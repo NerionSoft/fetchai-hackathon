@@ -28,7 +28,6 @@ import {
 } from "./config";
 import type { RealProvider } from "@/classroom/roster";
 import { resolveModel } from "./model-router";
-import { makeMemory } from "./storage";
 
 export const runtimeConfig: RuntimeConfig = getRuntimeConfig();
 
@@ -130,7 +129,6 @@ for (const spec of ROSTER) {
     name: `Élève ${spec.studentId}`,
     instructions: studentInstructions(spec),
     model: asModel(resolveModel(provider, subtle)),
-    memory: makeMemory(),
   });
   agentMeta[spec.studentId] = {
     key: spec.studentId,
@@ -153,7 +151,6 @@ for (const t of TEACHERS) {
     name: t.role,
     instructions: TEACHER_INSTRUCTIONS[t.key],
     model: asModel(resolveModel(provider, true)),
-    memory: makeMemory(),
   });
   agentMeta[t.key] = {
     key: t.key,
