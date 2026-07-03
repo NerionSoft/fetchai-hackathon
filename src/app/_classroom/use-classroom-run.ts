@@ -78,7 +78,7 @@ function reducer(state: RunState, action: Action): RunState {
   switch (e.type) {
     case "loop-start": {
       const agents: Record<string, AgentView> = {};
-      for (const m of e.agents) agents[m.agentId] = { meta: m, status: "en_attente", buffer: "" };
+      for (const m of e.agents) agents[m.agentId] = { meta: m, status: "waiting", buffer: "" };
       return {
         ...initialState,
         running: true,
@@ -94,7 +94,7 @@ function reducer(state: RunState, action: Action): RunState {
     case "agent-status":
       return patchAgent(state, e.agentId, {
         status: e.status,
-        ...(e.status === "reflechit" ? { buffer: "" } : {}),
+        ...(e.status === "thinking" ? { buffer: "" } : {}),
       });
     case "agent-token": {
       const cur = state.agents[e.agentId];
@@ -102,9 +102,9 @@ function reducer(state: RunState, action: Action): RunState {
       return patchAgent(state, e.agentId, { buffer: (cur.buffer + e.delta).slice(-2000) });
     }
     case "agent-done":
-      return patchAgent(state, e.agentId, { status: "termine", summary: e.summary });
+      return patchAgent(state, e.agentId, { status: "done", summary: e.summary });
     case "agent-error":
-      return patchAgent(state, e.agentId, { status: "echec", error: e.message });
+      return patchAgent(state, e.agentId, { status: "failed", error: e.message });
     case "usage":
       return {
         ...state,
@@ -163,7 +163,7 @@ export function useClassroomRun() {
       });
       if (!res.ok || !res.body) {
         const txt = await res.text().catch(() => "");
-        throw new Error(`Échec du lancement (${res.status}). ${txt}`);
+        throw new Error(`Failed to start (${res.status}). ${txt}`);
       }
 
       const reader = res.body.getReader();

@@ -1,16 +1,16 @@
 # ClassroomSim
 
-Une boucle d'**amélioration pédagogique autonome**, construite avec **Mastra** (framework agentique TypeScript) sur **Next.js 16 (App Router)**.
+An autonomous **pedagogical improvement loop**, built with **Mastra** (TypeScript agentic framework) on **Next.js 16 (App Router)**.
 
-Un professeur dépose une leçon. Des **classes d'élèves-agents** multi-modèles la restituent, un **prof-agent diagnosticien** agrège le signal, un **prof-agent rédacteur** réécrit la leçon, un **fact-checker** valide, puis des agents produisent **évaluations, exercices et fiches de révision** — le tout **piloté par le diagnostic** et visible **en direct** (streaming token par token) dans une scène **SVG**.
+A teacher submits a lesson. Multi-model **classes of student-agents** re-explain it, a **diagnostician teacher-agent** aggregates the signal, a **writer teacher-agent** rewrites the lesson, a **fact-checker** validates it, and then agents produce **assessments, exercises, and revision sheets** — all **driven by the diagnosis** and visible **live** (token-by-token streaming) in an **SVG** scene.
 
-> Ce n'est pas un wrapper d'appels API : ce sont de vrais agents Mastra (rôles, system prompts, mémoire) orchestrés par un workflow Mastra typé par Zod.
+> This is not an API-call wrapper: these are real Mastra agents (roles, system prompts, memory) orchestrated by a Zod-typed Mastra workflow.
 
 ---
 
-## Démarrage rapide (zéro clé API)
+## Quick start (zero API key)
 
-Par défaut, ClassroomSim tourne sur un **fournisseur mock déterministe** : la boucle complète (18 élèves-agents + agents enseignants + live SVG + supports exportables) fonctionne **sans aucune clé API** et sans base de données.
+By default, ClassroomSim runs on a **deterministic mock provider**: the full loop (18 student-agents + teacher agents + live SVG + exportable materials) works **without any API key** and without a database.
 
 ```bash
 pnpm install
@@ -18,166 +18,166 @@ pnpm dev
 # → http://localhost:3000
 ```
 
-1. Cliquez **« Charger la leçon de démo »** (leçon « Les intérêts composés », avec défauts volontaires).
-2. Cliquez **« Lancer la boucle »**.
-3. Regardez les 3 classes restituer en direct, puis le diagnostic, la réécriture, le fact-check et les supports apparaître. La boucle complète prend ~8 s en mock.
-4. Téléchargez les supports via les boutons d'**export**.
+1. Click **"Load demo lesson"** (the "Compound Interest" lesson, with deliberate flaws).
+2. Click **"Run the loop"**.
+3. Watch the 3 classes re-explain live, then see the diagnosis, rewrite, fact-check, and materials appear. The full loop takes ~8s in mock mode.
+4. Download the materials via the **export** buttons.
 
-`pnpm build` n'est pas requis pour la démo. (Note : le starter contient un exemple d'API hexagonale `src/app/api/example-hexagone` qui dépend de `DATABASE_URL` ; il n'est pas utilisé par ClassroomSim et n'est compilé qu'à la demande en dev.)
+`pnpm build` is not required for the demo. (Note: the starter includes a sample hexagonal API, `src/app/api/example-hexagone`, which depends on `DATABASE_URL`; it is not used by ClassroomSim and is only compiled on demand in dev.)
 
 ---
 
-## Modes & variables d'environnement
+## Modes & environment variables
 
-Voir `.env.example`. ClassroomSim **n'a pas besoin** de `DATABASE_URL` ni `BETTER_AUTH_SECRET` (l'auth du starter est désactivée).
+See `.env.example`. ClassroomSim **does not need** `DATABASE_URL` or `BETTER_AUTH_SECRET` (the starter's auth is disabled).
 
-| Variable | Défaut | Rôle |
+| Variable | Default | Role |
 |---|---|---|
-| `MASTRA_DB_URL` | `file:./mastra.db` | Stockage Mastra (SQLite via LibSQL, sur disque, sans serveur) |
-| `DEV_SINGLE_PROVIDER` | _(absent)_ | Force **tous** les élèves sur un seul fournisseur : `anthropic`\|`openai`\|`google`\|`deepseek` |
-| `DEMO_MODE` | `false` | Active le mode **multi-fournisseurs** (chaque élève sur son fournisseur préféré) |
-| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` | _(absent)_ | Clés réelles (uniquement pour les modes ci-dessus) |
-| `OPENAI_MODEL` (et `_STRONG`) | `gpt-5.4-mini` | Modèle OpenAI (préfixe `openai/` ajouté automatiquement) |
-| `ANTHROPIC_MODEL` / `GOOGLE_MODEL` / `DEEPSEEK_MODEL` (+ `_STRONG`) | défauts intégrés | Override du modèle par fournisseur |
-| `CLASSROOM_CONCURRENCY` | `6` | Appels d'élèves en parallèle (limite le fan-out réel) |
-| `MOCK_TOKEN_DELAY_MS` | `5` | Cadence du streaming mock (0 = instantané) |
+| `MASTRA_DB_URL` | `file:./mastra.db` | Mastra storage (SQLite via LibSQL, on disk, serverless) |
+| `DEV_SINGLE_PROVIDER` | _(unset)_ | Forces **all** students onto a single provider: `anthropic`\|`openai`\|`google`\|`deepseek` |
+| `DEMO_MODE` | `false` | Enables **multi-provider** mode (each student on their preferred provider) |
+| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` | _(unset)_ | Real keys (only needed for the modes above) |
+| `OPENAI_MODEL` (and `_STRONG`) | `gpt-5.4-mini` | OpenAI model (the `openai/` prefix is added automatically) |
+| `ANTHROPIC_MODEL` / `GOOGLE_MODEL` / `DEEPSEEK_MODEL` (+ `_STRONG`) | built-in defaults | Per-provider model override |
+| `CLASSROOM_CONCURRENCY` | `6` | Concurrent student calls (bounds actual fan-out) |
+| `MOCK_TOKEN_DELAY_MS` | `5` | Mock streaming pace (0 = instant) |
 
-Modèles par défaut : OpenAI = `gpt-5.4-mini`, Anthropic = `claude-sonnet-4.6`, Google = `gemini-2.5-flash`, DeepSeek = `deepseek-v3.2` (tier « strong » pour les profils subtils N5/N6/anxieux). Pinnez-en un autre via `<PROVIDER>_MODEL`.
+Default models: OpenAI = `gpt-5.4-mini`, Anthropic = `claude-sonnet-4.6`, Google = `gemini-2.5-flash`, DeepSeek = `deepseek-v3.2` ("strong" tier for subtle N5/N6/anxious profiles). Pin a different one via `<PROVIDER>_MODEL`.
 
-**Sélection du mode** (par ordre de priorité) :
+**Mode selection** (in priority order):
 
-1. `DEV_SINGLE_PROVIDER=<p>` défini → mode **single** (tous les élèves sur `<p>`).
-2. sinon `DEMO_MODE=true` **et** au moins une clé présente → mode **demo** (4 fournisseurs réels).
-3. sinon → mode **mock** (déterministe, sans clé). *C'est le défaut sûr pour le budget.*
+1. `DEV_SINGLE_PROVIDER=<p>` set → **single** mode (all students on `<p>`).
+2. otherwise `DEMO_MODE=true` **and** at least one key present → **demo** mode (4 real providers).
+3. otherwise → **mock** mode (deterministic, no key needed). *This is the safe default for budget.*
 
-Exemple — **uniquement OpenAI avec `gpt-5.4-mini`** (modèle OpenAI par défaut) :
+Example — **OpenAI only, with `gpt-5.4-mini`** (default OpenAI model):
 
 ```bash
 # .env
 DEV_SINGLE_PROVIDER=openai
 OPENAI_API_KEY=sk-...
-# (gpt-5.4-mini est déjà le défaut ; pour un autre modèle : OPENAI_MODEL=gpt-4o-mini)
+# (gpt-5.4-mini is already the default; for a different model: OPENAI_MODEL=gpt-4o-mini)
 ```
 
 ---
 
-## Les 3 classes
+## The 3 classes
 
-15-18 élèves par boucle, chaque élève = **niveau de maîtrise** (N0→N6) × **style cognitif** (S-*) × **fournisseur**.
+15-18 students per loop, each student = **mastery level** (N0→N6) × **cognitive style** (S-*) × **provider**.
 
-| Classe | Rôle | Concentration |
+| Class | Role | Focus |
 |---|---|---|
-| **A — Stress-test** | Détecter ce que la leçon échoue à transmettre | N0–N3, styles variés |
-| **B — Réaliste** | Simuler une vraie salle hétérogène | dominante N2–N4 |
-| **C — Audit qualité** | N5 valide ce qui marche, N6 critique le support | N4–N6 |
+| **A — Stress test** | Detect what the lesson fails to convey | N0–N3, varied styles |
+| **B — Realistic** | Simulate a real, heterogeneous classroom | mostly N2–N4 |
+| **C — Quality audit** | N5 validates what works, N6 critiques the material | N4–N6 |
 
-Les profils subtils (N5, N6, S-ANXIEUX) reçoivent les meilleurs modèles ; les profils grossiers tolèrent des modèles plus faibles. (Voir `src/classroom/roster.ts` et `src/classroom/profiles.ts`.)
+Subtle profiles (N5, N6, S-ANXIOUS) get the best models; coarse profiles tolerate weaker models. (See `src/classroom/roster.ts` and `src/classroom/profiles.ts`.)
 
 ---
 
 ## Architecture
 
 ```
-src/classroom/        Domaine pur (client + serveur, AUCUN import @mastra)
-  schemas.ts          Contrat de données Zod (StudentRestitution, TeacherDiagnosis, …)
-  profiles.ts         Catalogues niveaux N0-N6 + styles S-* (→ system prompts)
-  roster.ts           Composition des 3 classes
-  colors.ts           Couleur déterministe par studentId
-  events.ts           Protocole SSE (union discriminée)
-  export.ts           Export Markdown / HTML imprimable
+src/classroom/        Pure domain (client + server, NO @mastra imports)
+  schemas.ts          Zod data contract (StudentRestitution, TeacherDiagnosis, …)
+  profiles.ts         N0-N6 level catalogs + S-* style catalogs (→ system prompts)
+  roster.ts           Composition of the 3 classes
+  colors.ts           Deterministic color per studentId
+  events.ts           SSE protocol (discriminated union)
+  export.ts           Markdown / printable HTML export
 
-src/mastra/           Runtime agentique (serveur uniquement)
-  config.ts           Flags, détection des clés, tiers de modèles, table de coûts
-  model-router.ts     provider/model string OU modèle mock
-  agents.ts           18 élèves + 6 enseignants (instructions + modèle + mémoire)
-  workflow.ts         Workflow Mastra : 6 steps typés Zod, .commit()
-  storage.ts          LibSQLStore (SQLite) + mémoire
-  index.ts            Instance Mastra (agents + workflow + storage)
-  mock/               Modèle mock LanguageModelV2 + "mock brain" déterministe
+src/mastra/           Agentic runtime (server only)
+  config.ts           Flags, key detection, model tiers, cost table
+  model-router.ts     provider/model string OR mock model
+  agents.ts           18 students + 6 teachers (instructions + model + memory)
+  workflow.ts         Mastra workflow: 6 Zod-typed steps, .commit()
+  storage.ts          LibSQLStore (SQLite) + memory
+  index.ts            Mastra instance (agents + workflow + storage)
+  mock/               Mock LanguageModelV2 model + deterministic "mock brain"
   run/                emitter (SSE side-channel), agent-call, calls, briefs, loop
 
 src/app/
-  page.tsx            Dépôt + scène live + panneaux résultat
-  _classroom/         Hook SSE + scène SVG + panneaux + exports
+  page.tsx            Submission + live scene + result panels
+  _classroom/         SSE hook + SVG scene + panels + exports
   api/classroom/run   Route Handler POST → SSE (Web Streams)
-  api/classroom/demo  Route GET → leçon de démo
+  api/classroom/demo  Route GET → demo lesson
 
-content/lessons/interets-composes.md   Leçon de démo (défauts volontaires)
+content/lessons/interets-composes.md   Demo lesson (deliberate flaws)
 ```
 
-**Flux du workflow** (chaque sortie typée alimente le step suivant) :
-`simulate` (élèves en parallèle) → `diagnose` → `rewrite` → `factCheckLesson` → `produce` (éval + exercices + fiche en parallèle) → `factCheckProduction` → `LoopResult`.
+**Workflow flow** (each typed output feeds the next step):
+`simulate` (students in parallel) → `diagnose` → `rewrite` → `factCheckLesson` → `produce` (assessment + exercises + sheet in parallel) → `factCheckProduction` → `LoopResult`.
 
-**Streaming** : chaque `agent.stream()` voit ses `text-delta` réémis en événements SSE via un canal latéral indexé par `runId` (le visuel ne contraint jamais l'orchestration). Le front (fetch-streaming) pilote l'état des cercles SVG.
+**Streaming**: each `agent.stream()` has its `text-delta`s re-emitted as SSE events via a side channel indexed by `runId` (the visuals never constrain the orchestration). The frontend (fetch-streaming) drives the state of the SVG circles.
 
 ---
 
-## Scène live (SVG)
+## Live scene (SVG)
 
-- Chaque agent = un **cercle SVG** (couleur déterministe dérivée du studentId) devant un « tableau ».
-- **Bulle de dialogue** au-dessus, remplie token par token pendant le streaming.
-- **États** : `en attente` (atténué) · `réfléchit` (bulle « … » pulsée) · `parle` (bulle en streaming) · `terminé` (résumé condensé) · `en échec` (cercle grisé + ✕).
-- **Badges** : niveau (N0–N6), style (S-*), pastille couleur du fournisseur.
-- Le visuel ne bloque jamais la boucle : si le rendu échoue, les résultats restent accessibles en texte dans les panneaux.
+- Each agent = an **SVG circle** (deterministic color derived from studentId) in front of a "board".
+- **Speech bubble** above it, filled token by token while streaming.
+- **States**: `waiting` (dimmed) · `thinking` (pulsing "…" bubble) · `speaking` (streaming bubble) · `done` (condensed summary) · `failed` (grayed-out circle + ✕).
+- **Badges**: level (N0–N6), style (S-*), provider color dot.
+- The visuals never block the loop: if rendering fails, the results remain accessible as text in the panels.
 
 ---
 
 ## Exports
 
-Depuis le panneau **Exports**, une case **« Inclure les corrigés »** (les corrigés sont donc *séparables*) puis :
+From the **Exports** panel, a **"Include answer keys"** checkbox (so answer keys can be *excluded*), then:
 
-**PDF** (vrais fichiers `.pdf`, générés côté client via jsPDF) :
+**PDF** (real `.pdf` files, generated client-side via jsPDF):
 
-- **Dossier complet** — leçon réécrite + synthèse du diagnostic + évaluations + exercices + fiche.
-- **Leçon** — la version réécrite seule.
-- **Évaluations** — les 3 niveaux, corrigés inline (optionnels).
-- **Exercices** — exercices engageants, corrigés/commentaires optionnels.
-- **Fiche de révision** — prérequis en tête, points clés, définitions, pièges.
+- **Full package** — rewritten lesson + diagnosis summary + assessments + exercises + sheet.
+- **Lesson** — the rewritten version alone.
+- **Assessments** — all 3 levels, with inline answer keys (optional).
+- **Exercises** — engaging exercises, with optional answer keys/comments.
+- **Revision sheet** — prerequisites up front, key points, definitions, common pitfalls.
 
-**Autres formats** : **Markdown** et **HTML imprimable** (`@media print`).
+**Other formats**: **Markdown** and **printable HTML** (`@media print`).
 
-Implémentation : `src/classroom/pdf.ts` (jsPDF) et `src/classroom/export.ts` (Markdown/HTML) — toutes pures et côté client.
-
----
-
-## Leçon de démo & défauts volontaires
-
-`content/lessons/interets-composes.md` contient **trois défauts diagnosticables** :
-
-1. **Jargon non défini** — le terme « capitalisation » est employé (en gras) mais jamais défini.
-2. **Prérequis implicite** — « il suffit de multiplier par le taux » suppose la conversion pourcentage → coefficient `(1 + taux)`, jamais expliquée (et induit le contresens N2 « ×0,05 »).
-3. **Passage ambigu** — « Un point de vigilance » évoque que le résultat dépend de « la manière dont on l'applique » sans préciser la fréquence de capitalisation.
-
-La boucle les détecte : le diagnostic les remonte en `prerequis_manquants` / `passages_ambigus` / priorités de réécriture, et la version réécrite explicite les prérequis et définit le jargon.
+Implementation: `src/classroom/pdf.ts` (jsPDF) and `src/classroom/export.ts` (Markdown/HTML) — both pure and client-side.
 
 ---
 
-## Résilience & coût
+## Demo lesson & deliberate flaws
 
-- **Élève** dont la clé manque (mode réel) ou dont l'appel échoue → marqué **« en échec »** (cercle grisé), la classe continue.
-- **Enseignant** dont l'appel échoue → **repli automatique sur le moteur mock déterministe** pour que la boucle se termine toujours (annoncé dans le journal).
-- Les élèves d'une classe sont lancés **en parallèle** (concurrence bornée par `CLASSROOM_CONCURRENCY`).
-- Un **compteur de tokens / coût estimé** s'affiche en direct (table de coûts approximative dans `config.ts`).
+`content/lessons/interets-composes.md` contains **three diagnosable flaws**:
+
+1. **Undefined jargon** — the term "compounding" is used (in bold) but never defined.
+2. **Implicit prerequisite** — "you just multiply by the rate" assumes the percentage → coefficient `(1 + rate)` conversion, which is never explained (and induces the N2 misconception "×0.05").
+3. **Ambiguous passage** — "A point of caution" states that the result depends on "the way it is applied" without specifying the compounding frequency.
+
+The loop detects them: the diagnosis surfaces them under `missing_prerequisites` / `ambiguous_passages` / rewrite priorities, and the rewritten version makes the prerequisites explicit and defines the jargon.
 
 ---
 
-## Décisions & TODO
+## Resilience & cost
 
-**Décisions prises** (les plus simples préservant l'intention) :
+- A **student** whose key is missing (real mode) or whose call fails → marked **"failed"** (grayed-out circle), the class continues.
+- A **teacher** whose call fails → **automatic fallback to the deterministic mock engine** so the loop always completes (announced in the log).
+- The students in a class are launched **in parallel** (concurrency bounded by `CLASSROOM_CONCURRENCY`).
+- A **token counter / estimated cost** is displayed live (approximate cost table in `config.ts`).
 
-- **Stack** : on ne respecte pas les conventions hexagonales/auth/Postgres du starter (décision utilisateur). ClassroomSim vit dans `src/classroom` (domaine) + `src/mastra` (runtime) ; persistance via le `LibSQLStore` de Mastra (SQLite), pas Prisma. L'auth du starter (`proxy.ts`, `instrumentation.ts`) est neutralisée pour que l'app démarre sans DB.
-- **Mock par défaut** : un modèle `LanguageModelV2` déterministe + un « mock brain » TS produisent une sortie schéma-valide et profil-cohérente par rôle, streamée token par token. Les 4 fournisseurs réels s'activent via les flags.
-- **Sortie structurée** : les vrais fournisseurs utilisent `structuredOutput` (validé Zod) ; le texte streamé est donc le JSON en cours de génération — la bulle l'affiche en direct puis montre un **résumé condensé** à la fin (idem pour le mock). Uniforme et honnête.
-- **Mock générique** : le mock brain extrait titre/sections/termes de n'importe quelle leçon ; les valeurs chiffrées des exemples sont écrites pour la leçon de finance de démo.
-- **Diff** : le panneau « leçon réécrite » met en évidence les lignes ajoutées par heuristique simple (pas un diff complet).
+---
 
-**TODO / pistes** :
+## Decisions & TODO
 
-- Vrai fallback du Model Router entre fournisseurs (au-delà du repli mock pour les enseignants).
-- Export PDF côté serveur (pdfkit) — l'export PDF actuel est généré côté client (jsPDF).
-- Mémoire inter-boucles exploitée (les agents se souviennent des leçons précédentes).
-- Tests unitaires Vitest sur le mock brain et les agrégations du diagnostic.
-- Découpage par classe en streaming réel via les events natifs du workflow (`run.stream`).
+**Decisions made** (the simplest ones that preserve intent):
+
+- **Stack**: we do not follow the starter's hexagonal/auth/Postgres conventions (user decision). ClassroomSim lives in `src/classroom` (domain) + `src/mastra` (runtime); persistence uses Mastra's `LibSQLStore` (SQLite), not Prisma. The starter's auth (`proxy.ts`, `instrumentation.ts`) is neutralized so the app starts without a DB.
+- **Mock by default**: a deterministic `LanguageModelV2` model + a TS "mock brain" produce schema-valid, profile-consistent output per role, streamed token by token. The 4 real providers are enabled via flags.
+- **Structured output**: the real providers use `structuredOutput` (Zod-validated); the streamed text is thus the JSON being generated — the bubble displays it live, then shows a **condensed summary** at the end (same for the mock). Uniform and honest.
+- **Generic mock**: the mock brain extracts title/sections/terms from any lesson; the numeric values in the examples are written for the demo finance lesson.
+- **Diff**: the "rewritten lesson" panel highlights added lines using a simple heuristic (not a full diff).
+
+**TODO / ideas**:
+
+- Real Model Router fallback across providers (beyond the mock fallback for teachers).
+- Server-side PDF export (pdfkit) — the current PDF export is generated client-side (jsPDF).
+- Cross-loop memory actually used (agents remembering previous lessons).
+- Vitest unit tests on the mock brain and the diagnosis aggregations.
+- Per-class streaming breakdown via the workflow's native events (`run.stream`).
 
 ---
 

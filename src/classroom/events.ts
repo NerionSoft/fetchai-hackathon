@@ -7,8 +7,8 @@
 import type {
   ClassId,
   FactCheckReport,
+  Level,
   LoopResult,
-  Niveau,
   PedagogicalProduction,
   Provider,
   Style,
@@ -17,7 +17,7 @@ import type {
 } from "./schemas";
 
 /** Visual state of an agent's circle, per the spec. */
-export type AgentStatus = "en_attente" | "reflechit" | "parle" | "termine" | "echec";
+export type AgentStatus = "waiting" | "thinking" | "speaking" | "done" | "failed";
 
 /** Which SVG lane an agent lives in: a class scene, or the teaching staff row. */
 export type Lane = ClassId | "staff";
@@ -28,13 +28,13 @@ export type AgentKind = "student" | "teacher";
 export interface AgentMeta {
   agentId: string;
   kind: AgentKind;
-  /** Role label, e.g. "diagnosticien", or the student profile short name. */
+  /** Role label, e.g. "diagnostician", or the student profile short name. */
   role: string;
   lane: Lane;
   label: string;
   hue: number;
   provider: Provider;
-  niveau?: Niveau;
+  level?: Level;
   style?: Style;
 }
 

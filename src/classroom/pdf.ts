@@ -1,7 +1,7 @@
 /**
  * Real PDF exports (client-side, via jsPDF). One document per deliverable
- * (leçon réécrite, évaluations, exercices, fiche) plus a full "dossier".
- * Corrigés are togglable (`includeCorriges`) so a teacher can print énoncés only.
+ * (rewritten lesson, evaluations, exercises, sheet) plus a full "dossier".
+ * Answer keys are togglable (`includeAnswerKeys`) so a teacher can print statements only.
  *
  * Client-only — imported solely by the result panels.
  */
@@ -16,10 +16,10 @@ const MUTED: RGB = [113, 113, 122];
 const ACCENT: RGB = [79, 70, 229];
 const MARGIN = 48;
 
-const NIVEAU_LABEL: Record<Evaluation["niveau"], string> = {
-  debutant: "Débutant",
-  intermediaire: "Intermédiaire",
-  avance: "Avancé",
+const LEVEL_LABEL: Record<Evaluation["level"], string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
 };
 
 function clean(s: string): string {
@@ -89,8 +89,8 @@ class Pdf {
   muted(text: string) {
     this.write(text, { size: 9.5, color: MUTED, gap: 6 });
   }
-  corrige(text: string) {
-    this.write(`Corrigé : ${text}`, { size: 10, style: "italic", color: ACCENT, gap: 7 });
+  answerKey(text: string) {
+    this.write(`Answer key: ${text}`, { size: 10, style: "italic", color: ACCENT, gap: 7 });
   }
   bullet(text: string) {
     this.doc.setFont("helvetica", "normal");
@@ -145,53 +145,53 @@ function renderMarkdown(p: Pdf, md: string) {
 
 /* ------------------------------- sections --------------------------------- */
 
-function secEvaluations(p: Pdf, r: LoopResult, includeCorriges: boolean) {
-  p.h2("Évaluations");
-  (["debutant", "intermediaire", "avance"] as const).forEach((lvl) => {
-    p.h3(`Niveau ${NIVEAU_LABEL[lvl]}`);
+function secEvaluations(p: Pdf, r: LoopResult, includeAnswerKeys: boolean) {
+  p.h2("Evaluations");
+  (["beginner", "intermediate", "advanced"] as const).forEach((lvl) => {
+    p.h3(`Level ${LEVEL_LABEL[lvl]}`);
     r.production.evaluations[lvl].items.forEach((it, i) => {
-      p.para(`${i + 1}. ${it.enonce}`);
-      p.muted(`(${it.type}) — concept ciblé : ${it.concept_cible}`);
+      p.para(`${i + 1}. ${it.statement}`);
+      p.muted(`(${it.type}) — target concept: ${it.target_concept}`);
       it.options?.forEach((o) => p.bullet(o));
-      if (includeCorriges) p.corrige(it.corrige);
+      if (includeAnswerKeys) p.answerKey(it.answer_key);
     });
   });
 }
 
-function secExercices(p: Pdf, r: LoopResult, includeCorriges: boolean) {
-  p.h2("Exercices");
-  r.production.exercices.exercices.forEach((ex, i) => {
-    p.h3(`${i + 1}. ${ex.titre}`);
-    p.muted(`${ex.format} · ${ex.niveau_indicatif} · concept : ${ex.concept_cible}`);
-    p.para(ex.enonce);
-    if (includeCorriges) p.corrige(ex.corrige);
+function secExercises(p: Pdf, r: LoopResult, includeAnswerKeys: boolean) {
+  p.h2("Exercises");
+  r.production.exercises.exercises.forEach((ex, i) => {
+    p.h3(`${i + 1}. ${ex.title}`);
+    p.muted(`${ex.format} · ${ex.indicative_level} · concept: ${ex.target_concept}`);
+    p.para(ex.statement);
+    if (includeAnswerKeys) p.answerKey(ex.answer_key);
   });
 }
 
-function secFiche(p: Pdf, r: LoopResult) {
-  const f = r.production.fiche;
-  p.h2(f.titre);
-  p.h3("Prérequis");
-  f.prerequis.forEach((x) => p.bullet(x));
-  p.h3("Points clés");
-  f.points_cles.forEach((x) => p.bullet(x));
-  p.h3("Définitions");
-  f.definitions.forEach((d) => p.bullet(`${d.terme} : ${d.def}`));
-  p.h3("Pièges fréquents");
-  f.pieges_frequents.forEach((x) => p.bullet(x));
+function secSheet(p: Pdf, r: LoopResult) {
+  const f = r.production.sheet;
+  p.h2(f.title);
+  p.h3("Prerequisites");
+  f.prerequisites.forEach((x) => p.bullet(x));
+  p.h3("Key points");
+  f.key_points.forEach((x) => p.bullet(x));
+  p.h3("Definitions");
+  f.definitions.forEach((d) => p.bullet(`${d.term}: ${d.def}`));
+  p.h3("Common pitfalls");
+  f.common_pitfalls.forEach((x) => p.bullet(x));
 }
 
 function secDiagnosis(p: Pdf, r: LoopResult) {
   const d = r.diagnosis;
-  p.h2("Diagnostic (synthèse)");
-  p.h3("Concepts mal compris");
-  d.concepts_mal_compris.forEach((c) =>
-    p.bullet(`${c.concept} — gravité ${c.gravite}, ${c.frequence} élève(s)`),
+  p.h2("Diagnosis (summary)");
+  p.h3("Misunderstood concepts");
+  d.misunderstood_concepts.forEach((c) =>
+    p.bullet(`${c.concept} — severity ${c.severity}, ${c.frequency} student(s)`),
   );
-  p.h3("Prérequis manquants");
-  d.prerequis_manquants.forEach((x) => p.bullet(`${x.prerequis} — ${x.preuve}`));
-  p.h3("Priorités de réécriture");
-  d.priorites_de_reecriture.forEach((x, i) => p.bullet(`${i + 1}. ${x}`));
+  p.h3("Missing prerequisites");
+  d.missing_prerequisites.forEach((x) => p.bullet(`${x.prerequisite} — ${x.evidence}`));
+  p.h3("Rewrite priorities");
+  d.rewrite_priorities.forEach((x, i) => p.bullet(`${i + 1}. ${x}`));
 }
 
 /* ------------------------------- builders --------------------------------- */
@@ -202,37 +202,37 @@ export function lessonPdf(r: LoopResult): jsPDF {
   return p.doc;
 }
 
-export function evaluationsPdf(r: LoopResult, includeCorriges: boolean): jsPDF {
+export function evaluationsPdf(r: LoopResult, includeAnswerKeys: boolean): jsPDF {
   const p = new Pdf();
-  p.title(`${r.lessonVersion.title} — Évaluations`);
-  secEvaluations(p, r, includeCorriges);
+  p.title(`${r.lessonVersion.title} — Evaluations`);
+  secEvaluations(p, r, includeAnswerKeys);
   return p.doc;
 }
 
-export function exercicesPdf(r: LoopResult, includeCorriges: boolean): jsPDF {
+export function exercisesPdf(r: LoopResult, includeAnswerKeys: boolean): jsPDF {
   const p = new Pdf();
-  p.title(`${r.lessonVersion.title} — Exercices`);
-  secExercices(p, r, includeCorriges);
+  p.title(`${r.lessonVersion.title} — Exercises`);
+  secExercises(p, r, includeAnswerKeys);
   return p.doc;
 }
 
-export function fichePdf(r: LoopResult): jsPDF {
+export function sheetPdf(r: LoopResult): jsPDF {
   const p = new Pdf();
-  p.title(`${r.lessonVersion.title} — Fiche de révision`);
-  secFiche(p, r);
+  p.title(`${r.lessonVersion.title} — Revision sheet`);
+  secSheet(p, r);
   return p.doc;
 }
 
-export function dossierPdf(r: LoopResult, includeCorriges: boolean): jsPDF {
+export function dossierPdf(r: LoopResult, includeAnswerKeys: boolean): jsPDF {
   const p = new Pdf();
-  p.title(`${r.lessonVersion.title} — Dossier pédagogique`);
-  p.muted("Supports générés par ClassroomSim, pilotés par le diagnostic des classes simulées.");
-  p.h2("Leçon (version réécrite)");
+  p.title(`${r.lessonVersion.title} — Pedagogical dossier`);
+  p.muted("Materials generated by ClassroomSim, driven by the diagnosis of the simulated classes.");
+  p.h2("Lesson (rewritten version)");
   renderMarkdown(p, r.lessonVersion.markdown);
   secDiagnosis(p, r);
-  secEvaluations(p, r, includeCorriges);
-  secExercices(p, r, includeCorriges);
-  secFiche(p, r);
+  secEvaluations(p, r, includeAnswerKeys);
+  secExercises(p, r, includeAnswerKeys);
+  secSheet(p, r);
   return p.doc;
 }
 

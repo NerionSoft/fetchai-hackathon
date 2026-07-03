@@ -1,72 +1,72 @@
 /**
- * ClassroomSim — composition des 3 classes (18 élèves).
+ * ClassroomSim — composition of the 3 classes (18 students).
  *
- * Chaque élève = niveau (axe 1) × style (axe 2) × fournisseur préféré.
- * Le fournisseur préféré n'est qu'un INDICE : le model-router résout le modèle
- * réel selon les clés disponibles (ou bascule sur le mock). Les profils subtils
- * (N5, N6, S-ANXIEUX) reçoivent les meilleurs modèles ; les profils grossiers
- * (N0, N1, S-LITTERAL) tolèrent des modèles plus faibles.
+ * Each student = level (axis 1) × style (axis 2) × preferred provider.
+ * The preferred provider is only a HINT: the model-router resolves the
+ * actual model based on the available keys (or falls back to the mock).
+ * Subtle profiles (N5, N6, S-ANXIOUS) get the best models; coarse profiles
+ * (N0, N1, S-LITERAL) tolerate weaker models.
  */
-import type { ClassId, Niveau, Provider, Style } from "./schemas";
+import type { ClassId, Level, Provider, Style } from "./schemas";
 
 export type RealProvider = Exclude<Provider, "mock">;
 
 export interface StudentSpec {
   studentId: string;
   classId: ClassId;
-  niveau: Niveau;
+  level: Level;
   style: Style;
   preferredProvider: RealProvider;
 }
 
 export interface ClassMeta {
   classId: ClassId;
-  nom: string;
+  name: string;
   role: string;
 }
 
 export const CLASS_META: Record<ClassId, ClassMeta> = {
   A: {
     classId: "A",
-    nom: "Stress-test",
-    role: "Bas/milieu du spectre (N0–N3) : détecte ce que la leçon échoue à transmettre.",
+    name: "Stress test",
+    role: "Low/mid spectrum (N0–N3): detects what the lesson fails to convey.",
   },
   B: {
     classId: "B",
-    nom: "Classe réaliste",
-    role: "Distribution équilibrée (dominante N2–N4) : simule une vraie salle hétérogène.",
+    name: "Realistic class",
+    role: "Balanced distribution (mostly N2–N4): simulates a real, heterogeneous classroom.",
   },
   C: {
     classId: "C",
-    nom: "Audit qualité",
-    role: "Haut du spectre (N4–N6) : N5 valide ce qui marche, N6 critique les défauts.",
+    name: "Quality audit",
+    role: "High end of the spectrum (N4–N6): N5 validates what works, N6 critiques the flaws.",
   },
 };
 
 export const ROSTER: StudentSpec[] = [
-  // ── Classe A — STRESS-TEST (N0–N3, styles variés) ──
-  { studentId: "A1", classId: "A", niveau: "N0", style: "S-LITTERAL", preferredProvider: "deepseek" },
-  { studentId: "A2", classId: "A", niveau: "N1", style: "S-SEQUENTIEL", preferredProvider: "deepseek" },
-  { studentId: "A3", classId: "A", niveau: "N2", style: "S-CONTEXTE-MANQUANT", preferredProvider: "google" },
-  { studentId: "A4", classId: "A", niveau: "N2", style: "S-IMPATIENT", preferredProvider: "openai" },
-  { studentId: "A5", classId: "A", niveau: "N3", style: "S-ANALOGIQUE", preferredProvider: "google" },
-  { studentId: "A6", classId: "A", niveau: "N3", style: "S-ANXIEUX", preferredProvider: "anthropic" },
+  // ── Class A — STRESS TEST (N0–N3, varied styles) ──
+  { studentId: "A1", classId: "A", level: "N0", style: "S-LITERAL", preferredProvider: "deepseek" },
+  { studentId: "A2", classId: "A", level: "N1", style: "S-SEQUENTIAL", preferredProvider: "deepseek" },
+  { studentId: "A3", classId: "A", level: "N2", style: "S-MISSING-CONTEXT", preferredProvider: "google" },
+  { studentId: "A4", classId: "A", level: "N2", style: "S-IMPATIENT", preferredProvider: "openai" },
+  { studentId: "A5", classId: "A", level: "N3", style: "S-ANALOGICAL", preferredProvider: "google" },
+  { studentId: "A6", classId: "A", level: "N3", style: "S-ANXIOUS", preferredProvider: "anthropic" },
 
-  // ── Classe B — RÉALISTE (un peu de tout, dominante N2–N4) ──
-  { studentId: "B1", classId: "B", niveau: "N1", style: "S-ANALOGIQUE", preferredProvider: "deepseek" },
-  { studentId: "B2", classId: "B", niveau: "N2", style: "S-SEQUENTIEL", preferredProvider: "google" },
-  { studentId: "B3", classId: "B", niveau: "N3", style: "S-LITTERAL", preferredProvider: "openai" },
-  { studentId: "B4", classId: "B", niveau: "N3", style: "S-CONTEXTE-MANQUANT", preferredProvider: "google" },
-  { studentId: "B5", classId: "B", niveau: "N4", style: "S-IMPATIENT", preferredProvider: "openai" },
-  { studentId: "B6", classId: "B", niveau: "N5", style: "S-ANXIEUX", preferredProvider: "anthropic" },
+  // ── Class B — REALISTIC (a bit of everything, mostly N2–N4) ──
+  { studentId: "B1", classId: "B", level: "N1", style: "S-ANALOGICAL", preferredProvider: "deepseek" },
+  { studentId: "B2", classId: "B", level: "N2", style: "S-SEQUENTIAL", preferredProvider: "google" },
+  { studentId: "B3", classId: "B", level: "N3", style: "S-LITERAL", preferredProvider: "openai" },
+  { studentId: "B4", classId: "B", level: "N3", style: "S-MISSING-CONTEXT", preferredProvider: "google" },
+  { studentId: "B5", classId: "B", level: "N4", style: "S-IMPATIENT", preferredProvider: "openai" },
+  { studentId: "B6", classId: "B", level: "N5", style: "S-ANXIOUS", preferredProvider: "anthropic" },
 
-  // ── Classe C — AUDIT QUALITÉ (N4–N6 ; N5 valide, N6 critique) ──
-  { studentId: "C1", classId: "C", niveau: "N4", style: "S-ANALOGIQUE", preferredProvider: "google" },
-  { studentId: "C2", classId: "C", niveau: "N5", style: "S-SEQUENTIEL", preferredProvider: "openai" },
-  { studentId: "C3", classId: "C", niveau: "N5", style: "S-CONTEXTE-MANQUANT", preferredProvider: "anthropic" },
-  { studentId: "C4", classId: "C", niveau: "N6", style: "S-LITTERAL", preferredProvider: "anthropic" },
-  { studentId: "C5", classId: "C", niveau: "N6", style: "S-ANXIEUX", preferredProvider: "anthropic" },
-  { studentId: "C6", classId: "C", niveau: "N6", style: "S-IMPATIENT", preferredProvider: "openai" },
+  // ── Class C — QUALITY AUDIT (N4–N6; N5 validates, N6 critiques) ──
+  { studentId: "C1", classId: "C", level: "N4", style: "S-ANALOGICAL", preferredProvider: "google" },
+  { studentId: "C2", classId: "C", level: "N5", style: "S-SEQUENTIAL", preferredProvider: "openai" },
+  { studentId: "C3", classId: "C", level: "N5", style: "S-MISSING-CONTEXT", preferredProvider: "anthropic" },
+  { studentId: "C4", classId: "C", level: "N6", style: "S-LITERAL", preferredProvider: "anthropic" },
+  { studentId: "C5", classId: "C", level: "N6", style: "S-ANXIOUS", preferredProvider: "anthropic" },
+  { studentId: "C6", classId: "C", level: "N6", style: "S-IMPATIENT", preferredProvider: "openai" },
 ];
 
 export function studentsOfClass(classId: ClassId): StudentSpec[] {

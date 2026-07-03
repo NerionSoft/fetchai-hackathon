@@ -80,7 +80,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
             )
             r.raise_for_status()
             data = r.json()
-        answer = data.get("dossier_markdown") or data.get("error") or "(réponse vide)"
+        answer = data.get("dossier_markdown") or data.get("error") or "(empty response)"
     except Exception as e:
         ctx.logger.exception("Failed to generate dossier via ClassroomSim backend")
         answer = f"⚠️ error: {e}"

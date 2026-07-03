@@ -1,6 +1,6 @@
 /**
  * High-level agent calls with the loop's resilience policy baked in:
- *  - callStudent : a missing key or runtime failure marks the student "en échec"
+ *  - callStudent : a missing key or runtime failure marks the student "failed"
  *    (grey circle) and returns null; the loop continues with the other students.
  *  - callTeacher : a failure NEVER blocks the loop — it falls back to the
  *    deterministic mock brain so a complete diagnosis / rewrite / production is
@@ -31,17 +31,17 @@ export async function callTeacher<T>(params: CallParams<T>): Promise<T> {
   try {
     const obj = await runAgentStreamed(params);
     emit({ type: "agent-done", agentId: params.agentKey, summary: truncate(params.summary(obj)) });
-    emit({ type: "agent-status", agentId: params.agentKey, status: "termine" });
+    emit({ type: "agent-status", agentId: params.agentKey, status: "done" });
     return obj;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     emit({
       type: "log",
-      message: `Agent « ${params.agentKey} » en échec (${msg}). Repli sur le moteur déterministe pour ne pas bloquer la boucle.`,
+      message: `Agent "${params.agentKey}" failed (${msg}). Falling back to the deterministic engine to avoid blocking the loop.`,
     });
     const obj = params.schema.parse(produceMock(params.prompt.brief));
     emit({ type: "agent-done", agentId: params.agentKey, summary: truncate(params.summary(obj)) });
-    emit({ type: "agent-status", agentId: params.agentKey, status: "termine" });
+    emit({ type: "agent-status", agentId: params.agentKey, status: "done" });
     return obj;
   }
 }
@@ -51,20 +51,20 @@ export async function callStudent<T>(params: CallParams<T>): Promise<T | null> {
   const meta = agentMeta[params.agentKey];
 
   if (meta.missingKey) {
-    emit({ type: "agent-error", agentId: params.agentKey, message: `Clé API manquante (${meta.provider}).` });
-    emit({ type: "agent-status", agentId: params.agentKey, status: "echec" });
+    emit({ type: "agent-error", agentId: params.agentKey, message: `Missing API key (${meta.provider}).` });
+    emit({ type: "agent-status", agentId: params.agentKey, status: "failed" });
     return null;
   }
 
   try {
     const obj = await runAgentStreamed(params);
     emit({ type: "agent-done", agentId: params.agentKey, summary: truncate(params.summary(obj)) });
-    emit({ type: "agent-status", agentId: params.agentKey, status: "termine" });
+    emit({ type: "agent-status", agentId: params.agentKey, status: "done" });
     return obj;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     emit({ type: "agent-error", agentId: params.agentKey, message: msg });
-    emit({ type: "agent-status", agentId: params.agentKey, status: "echec" });
+    emit({ type: "agent-status", agentId: params.agentKey, status: "failed" });
     return null;
   }
 }

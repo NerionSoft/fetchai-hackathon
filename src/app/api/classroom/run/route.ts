@@ -1,5 +1,5 @@
 /**
- * POST /api/classroom/run — runs a full ClassroomSim boucle and streams the
+ * POST /api/classroom/run — runs a full ClassroomSim loop and streams the
  * result as Server-Sent Events (one JSON `ClassroomEvent` per `data:` frame).
  *
  * The client reads this with fetch-streaming (not EventSource) so the lesson
@@ -19,12 +19,12 @@ export const maxDuration = 300;
 const BodySchema = z.object({
   id: z.string().optional(),
   title: z.string().optional(),
-  markdown: z.string().min(1, "La leçon est vide."),
+  markdown: z.string().min(1, "The lesson is empty."),
 });
 
 function titleFromMarkdown(md: string): string {
   const m = md.match(/^#\s+(.+)$/m);
-  return m ? m[1].trim() : "Leçon sans titre";
+  return m ? m[1].trim() : "Untitled lesson";
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -32,7 +32,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     body = BodySchema.parse(await req.json());
   } catch (err) {
-    const message = err instanceof z.ZodError ? err.issues.map((i) => i.message).join("; ") : "Corps invalide";
+    const message = err instanceof z.ZodError ? err.issues.map((i) => i.message).join("; ") : "Invalid body";
     return Response.json({ error: message }, { status: 400 });
   }
 

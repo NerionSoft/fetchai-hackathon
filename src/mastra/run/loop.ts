@@ -1,5 +1,5 @@
 /**
- * runLoop — drives one full ClassroomSim boucle and streams events to the caller.
+ * runLoop — drives one full ClassroomSim loop and streams events to the caller.
  *
  * Registers a per-run emitter, emits the cast up-front (so the SVG scene renders
  * immediately), runs the Mastra workflow to completion, and returns the final
@@ -25,7 +25,7 @@ export function buildCast(): AgentMeta[] {
     label: m.label,
     hue: colorForId(m.key).hue,
     provider: m.provider,
-    niveau: m.niveau,
+    level: m.level,
     style: m.style,
   }));
 }
@@ -55,10 +55,10 @@ export async function runLoop(lesson: Lesson, emit: (event: ClassroomEvent) => v
     await run.start({ inputData: { lesson, runId } });
 
     if (!captured) {
-      throw new Error("La boucle s'est terminée sans produire de résultat final.");
+      throw new Error("The loop ended without producing a final result.");
     }
 
-    wrapped({ type: "phase", phase: "done", label: "Terminé" });
+    wrapped({ type: "phase", phase: "done", label: "Done" });
     wrapped({ type: "done" });
     return captured;
   } finally {

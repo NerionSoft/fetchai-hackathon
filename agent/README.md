@@ -12,18 +12,18 @@ Koro ClassroomSim is an AI teaching assistant and EdTech agent for education pro
 - **Returns a single Markdown dossier** — ready to read, print, or paste into course materials.
 
 ## How to use
-Paste your lesson content as Markdown in the ASI:One chat. The agent runs the full simulation and returns a complete pedagogical dossier. Works in French and English.
+Paste your lesson content as Markdown in the ASI:One chat. The agent runs the full simulation and returns a complete pedagogical dossier. It reads lessons written in any language and responds in English.
 
 Example queries:
 - "Here is my lesson on compound interest — find what students will misunderstand, rewrite it, then give me quizzes and exercises."
-- "Voici ma leçon de SVT : détecte les prérequis manquants, corrige le jargon, et produis une fiche de révision et des exercices."
+- "Take my biology lesson: detect the missing prerequisites, fix the jargon, and produce a revision sheet and exercises."
 
 ## Input / Output
-**Input:** a lesson in Markdown (starting with `# Title`), French or English.
-**Output:** a Markdown pedagogical dossier — rewritten lesson, diagnosis, evaluations by level (with corrigés), exercises, and a revision sheet.
+**Input:** a lesson in Markdown (starting with `# Title`).
+**Output:** a Markdown pedagogical dossier — rewritten lesson, diagnosis, evaluations by level (with answer keys), exercises, and a revision sheet.
 
 ## Domain / keywords
-education, edtech, pedagogy, teaching assistant, lesson planning, lesson diagnosis, misconception detection, quiz generation, exercise generation, revision sheet, curriculum design, instructional design, fact-checking, multi-agent simulation, learning styles, formative assessment, French education, éducation, pédagogie, fiche de révision, teacher tools, tutoring
+education, edtech, pedagogy, teaching assistant, lesson planning, lesson diagnosis, misconception detection, quiz generation, exercise generation, revision sheet, curriculum design, instructional design, fact-checking, multi-agent simulation, learning styles, formative assessment, teacher tools, tutoring
 
 ## Powered by
 Built on the **Mastra** agentic runtime (simulate → diagnose → rewrite → fact-check → produce) and exposed through the **Fetch.ai uAgents chat protocol**, discoverable on **Agentverse** and searchable via **ASI:One**.

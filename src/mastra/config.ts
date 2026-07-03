@@ -89,7 +89,7 @@ export function getRuntimeConfig(): RuntimeConfig {
  * Resolve the actual provider for a student.
  * - mock mode  → everyone is mock (no key needed, no failures).
  * - real modes → the real provider; if its key is missing, `missingKey` is true
- *   and the runner marks that student "en échec" (grey) while the loop continues
+ *   and the runner marks that student "failed" (grey) while the loop continues
  *   with the other students. (Teachers, by contrast, fall back to mock so the
  *   loop always completes — see resolveTeacherProvider.)
  */
@@ -104,7 +104,7 @@ export function resolveStudentProvider(
     return { provider: p, missingKey: !cfg.availableProviders.includes(p) };
   }
 
-  // demo: honor preferred provider; flag missing key as an échec in real mode.
+  // demo: honor preferred provider; flag missing key as a failure in real mode.
   return { provider: preferred, missingKey: !cfg.availableProviders.includes(preferred) };
 }
 

@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Le "monde SVG" — disposition immersive : dans chaque classe, les élèves-agents
- * sont assis en DEMI-CERCLE face à un TABLEAU ; pendant la phase de diagnostic,
- * des lignes de flux animées remontent des élèves vers le tableau. La salle des
- * profs aligne les agents enseignants devant leur propre tableau.
+ * The "SVG world" — immersive layout: in each class, the student-agents sit in
+ * a HALF-CIRCLE facing a BOARD; during the diagnosis phase, animated flow
+ * lines rise from the students toward the board. The staff room lines up the
+ * teacher-agents in front of their own board.
  *
- * 100% SVG/CSS, aucune image, positions fixes (aucun déplacement d'agent).
+ * 100% SVG/CSS, no images, fixed positions (no agent movement).
  */
 import type { Lane } from "@/classroom/events";
 import { PROVIDER_COLORS } from "@/classroom/colors";
@@ -25,10 +25,10 @@ const BOARD_H = 44;
 const HEIGHT = 322;
 
 const LANES: { lane: Lane; title: string; subtitle: string }[] = [
-  { lane: "A", title: `Classe A — ${CLASS_META.A.nom}`, subtitle: CLASS_META.A.role },
-  { lane: "B", title: `Classe B — ${CLASS_META.B.nom}`, subtitle: CLASS_META.B.role },
-  { lane: "C", title: `Classe C — ${CLASS_META.C.nom}`, subtitle: CLASS_META.C.role },
-  { lane: "staff", title: "Salle des profs (agents enseignants)", subtitle: "Diagnostic → réécriture → fact-check → production" },
+  { lane: "A", title: `Class A — ${CLASS_META.A.name}`, subtitle: CLASS_META.A.role },
+  { lane: "B", title: `Class B — ${CLASS_META.B.name}`, subtitle: CLASS_META.B.role },
+  { lane: "C", title: `Class C — ${CLASS_META.C.name}`, subtitle: CLASS_META.C.role },
+  { lane: "staff", title: "Staff room (teaching agents)", subtitle: "Diagnosis → rewrite → fact-check → production" },
 ];
 
 interface Pt {
@@ -51,15 +51,15 @@ function seatPositions(count: number, staff: boolean): Pt[] {
 function AgentNode({ agent, at }: { agent: AgentView; at: Pt }) {
   const { meta, status } = agent;
   const { x: cx, y: cy } = at;
-  const dim = status === "en_attente";
-  const failed = status === "echec";
+  const dim = status === "waiting";
+  const failed = status === "failed";
   const fill = failed ? "#d4d4d8" : `hsl(${meta.hue} 52% 57%)`;
   const stroke = failed ? "#a1a1aa" : `hsl(${meta.hue} 45% 42%)`;
 
-  const showBubble = status !== "en_attente";
+  const showBubble = status !== "waiting";
   const bubbleText =
-    status === "termine" ? agent.summary ?? "" : status === "echec" ? agent.error ?? "échec" : agent.buffer;
-  const mono = status === "parle";
+    status === "done" ? agent.summary ?? "" : status === "failed" ? agent.error ?? "failed" : agent.buffer;
+  const mono = status === "speaking";
   const by = Math.max(BOARD_Y + BOARD_H + 4, cy - R - 8 - BUBBLE_H);
 
   return (
@@ -79,7 +79,7 @@ function AgentNode({ agent, at }: { agent: AgentView; at: Pt }) {
               boxShadow: "0 1px 2px rgba(0,0,0,.05)",
             }}
           >
-            {status === "reflechit" ? (
+            {status === "thinking" ? (
               <span className="cs-dots cs-thinking" style={{ margin: "auto", fontSize: 18 }} />
             ) : (
               <div
@@ -100,7 +100,7 @@ function AgentNode({ agent, at }: { agent: AgentView; at: Pt }) {
         fill={fill}
         stroke={stroke}
         strokeWidth={2}
-        className={status === "reflechit" ? "cs-thinking" : undefined}
+        className={status === "thinking" ? "cs-thinking" : undefined}
       />
       <text x={cx} y={cy + 4} textAnchor="middle" fontSize={12} fontWeight={700} fill="#fff">
         {meta.label}
@@ -112,13 +112,13 @@ function AgentNode({ agent, at }: { agent: AgentView; at: Pt }) {
       )}
       <circle cx={cx + R - 3} cy={cy - R + 3} r={5} fill={PROVIDER_COLORS[meta.provider] ?? "#999"} stroke="#fff" strokeWidth={1} />
 
-      {meta.niveau ? (
+      {meta.level ? (
         <text x={cx} y={cy + R + 16} textAnchor="middle" fontSize={11} fontWeight={700} fill="currentColor">
-          {meta.niveau} · {meta.style?.replace("S-", "")}
+          {meta.level} · {meta.style?.replace("S-", "")}
         </text>
       ) : (
         <text x={cx} y={cy + R + 16} textAnchor="middle" fontSize={10} fill="currentColor">
-          {meta.role.replace(/^Prof |Concepteur d'|Concepteur de /, "")}
+          {meta.role}
         </text>
       )}
       <text x={cx} y={cy + R + 30} textAnchor="middle" fontSize={9} fill="var(--muted)">
@@ -158,13 +158,13 @@ function LaneScene({
           style={{ minWidth: width, maxWidth: "100%", display: "block" }}
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* tableau */}
+          {/* board */}
           <rect x={boardX} y={BOARD_Y} width={240} height={BOARD_H} rx={8} fill="#1f2937" stroke="#111827" />
           <text x={boardCx} y={BOARD_Y + BOARD_H / 2 + 4} textAnchor="middle" fontSize={12} fontWeight={600} fill="#e5e7eb">
-            {staff ? "Tableau — production" : "Tableau"}
+            {staff ? "Board — production" : "Board"}
           </text>
 
-          {/* flow lines élèves → tableau pendant le diagnostic */}
+          {/* flow lines students → board during diagnosis */}
           {flowing &&
             !staff &&
             pts.map((p, i) => (

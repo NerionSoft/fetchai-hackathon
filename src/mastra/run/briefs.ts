@@ -22,12 +22,12 @@ export interface AgentPrompt {
 
 export function buildStudent(spec: StudentSpec, provider: Provider, lesson: Lesson): AgentPrompt {
   return {
-    human: `Voici la leçon à étudier :\n\n${lesson.markdown}\n\nRestitue maintenant, en restant fidèle à ton profil, ce que tu crois avoir compris.`,
+    human: `Here is the lesson to study:\n\n${lesson.markdown}\n\nNow restitute, staying true to your profile, what you believe you understood.`,
     brief: {
       role: "student",
       studentId: spec.studentId,
       classId: spec.classId,
-      niveau: spec.niveau,
+      level: spec.level,
       style: spec.style,
       provider,
       lessonTitle: lesson.title,
@@ -38,62 +38,62 @@ export function buildStudent(spec: StudentSpec, provider: Provider, lesson: Less
 
 export function buildDiagnosis(lesson: Lesson, restitutions: StudentRestitution[]): AgentPrompt {
   return {
-    human: `Leçon originale :\n\n${lesson.markdown}\n\nRestitutions des élèves (JSON) :\n${JSON.stringify(
+    human: `Original lesson:\n\n${lesson.markdown}\n\nStudent restitutions (JSON):\n${JSON.stringify(
       restitutions,
-    )}\n\nProduis le diagnostic structuré.`,
+    )}\n\nProduce the structured diagnosis.`,
     brief: { role: "diagnosis", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, restitutions },
   };
 }
 
 export function buildRewrite(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
   return {
-    human: `Leçon originale :\n\n${lesson.markdown}\n\nDiagnostic (JSON) :\n${JSON.stringify(
+    human: `Original lesson:\n\n${lesson.markdown}\n\nDiagnosis (JSON):\n${JSON.stringify(
       diagnosis,
-    )}\n\nProduis la nouvelle version enrichie.`,
+    )}\n\nProduce the new enriched version.`,
     brief: { role: "rewrite", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
   };
 }
 
 export function buildFactCheck(target: FactCheckTarget, title: string, content: string): AgentPrompt {
   return {
-    human: `Vérifie le livrable suivant (${target}) intitulé « ${title} » :\n\n${content}\n\nSignale toute affirmation douteuse ou fausse, corrigé inclus.`,
+    human: `Verify the following deliverable (${target}) titled "${title}":\n\n${content}\n\nFlag any dubious or false claim, with a suggested correction.`,
     brief: { role: "factcheck", target, title, content },
   };
 }
 
 export function buildEvaluations(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
   return {
-    human: `Leçon finale validée :\n\n${lesson.markdown}\n\nDiagnostic (JSON) :\n${JSON.stringify(
+    human: `Final validated lesson:\n\n${lesson.markdown}\n\nDiagnosis (JSON):\n${JSON.stringify(
       diagnosis,
-    )}\n\nProduis les évaluations sur 3 niveaux, pilotées par le diagnostic.`,
+    )}\n\nProduce the assessments across 3 levels, driven by the diagnosis.`,
     brief: { role: "evaluations", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
   };
 }
 
-export function buildExercices(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
+export function buildExercises(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
   return {
-    human: `Leçon finale validée :\n\n${lesson.markdown}\n\nDiagnostic (JSON) :\n${JSON.stringify(
+    human: `Final validated lesson:\n\n${lesson.markdown}\n\nDiagnosis (JSON):\n${JSON.stringify(
       diagnosis,
-    )}\n\nProduis des exercices engageants ancrés sur les points faibles diagnostiqués.`,
-    brief: { role: "exercices", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
+    )}\n\nProduce engaging exercises anchored on the diagnosed weak points.`,
+    brief: { role: "exercises", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
   };
 }
 
-export function buildFiche(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
+export function buildSheet(lesson: Lesson, diagnosis: TeacherDiagnosis): AgentPrompt {
   return {
-    human: `Leçon finale validée :\n\n${lesson.markdown}\n\nDiagnostic (JSON) :\n${JSON.stringify(
+    human: `Final validated lesson:\n\n${lesson.markdown}\n\nDiagnosis (JSON):\n${JSON.stringify(
       diagnosis,
-    )}\n\nProduis une fiche de révision (prérequis explicités en tête).`,
-    brief: { role: "fiche", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
+    )}\n\nProduce a revision sheet (prerequisites made explicit at the top).`,
+    brief: { role: "sheet", lessonTitle: lesson.title, lessonMarkdown: lesson.markdown, diagnosis },
   };
 }
 
 /** Serialize a production bundle's deliverable to plain text for fact-checking. */
 export function productionPartToText(
   production: PedagogicalProduction,
-  part: "evaluations" | "exercices" | "fiche",
+  part: "evaluations" | "exercises" | "sheet",
 ): string {
   if (part === "evaluations") return JSON.stringify(production.evaluations, null, 2);
-  if (part === "exercices") return JSON.stringify(production.exercices, null, 2);
-  return JSON.stringify(production.fiche, null, 2);
+  if (part === "exercises") return JSON.stringify(production.exercises, null, 2);
+  return JSON.stringify(production.sheet, null, 2);
 }

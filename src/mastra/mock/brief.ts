@@ -6,7 +6,7 @@
  */
 import type {
   ClassId,
-  Niveau,
+  Level,
   Provider,
   Style,
   StudentRestitution,
@@ -19,17 +19,17 @@ export type MockRole =
   | "rewrite"
   | "factcheck"
   | "evaluations"
-  | "exercices"
-  | "fiche";
+  | "exercises"
+  | "sheet";
 
-export type FactCheckTarget = "lesson" | "evaluations" | "exercices" | "fiche";
+export type FactCheckTarget = "lesson" | "evaluations" | "exercises" | "sheet";
 
 export type MockBrief =
   | {
       role: "student";
       studentId: string;
       classId: ClassId;
-      niveau: Niveau;
+      level: Level;
       style: Style;
       provider: Provider;
       lessonTitle: string;
@@ -39,8 +39,8 @@ export type MockBrief =
   | { role: "rewrite"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis }
   | { role: "factcheck"; target: FactCheckTarget; title: string; content: string }
   | { role: "evaluations"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis }
-  | { role: "exercices"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis }
-  | { role: "fiche"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis };
+  | { role: "exercises"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis }
+  | { role: "sheet"; lessonTitle: string; lessonMarkdown: string; diagnosis: TeacherDiagnosis };
 
 const START = "<<<MOCK_BRIEF>>>";
 const END = "<<<END_MOCK_BRIEF>>>";

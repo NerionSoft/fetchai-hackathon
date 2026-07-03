@@ -14,12 +14,12 @@ import type { MastraModelConfig } from "@mastra/core/llm";
 import type { Lane } from "@/classroom/events";
 import { CLASS_META, ROSTER, type StudentSpec } from "@/classroom/roster";
 import {
-  NIVEAU_PROFILES,
-  PRINCIPE_DIRECTEUR,
+  LEVEL_PROFILES,
+  GUIDING_PRINCIPLE,
   STYLE_PROFILES,
   isSubtleProfile,
 } from "@/classroom/profiles";
-import type { Niveau, Provider, Style } from "@/classroom/schemas";
+import type { Level, Provider, Style } from "@/classroom/schemas";
 
 import {
   getRuntimeConfig,
@@ -34,46 +34,46 @@ export const runtimeConfig: RuntimeConfig = getRuntimeConfig();
 /* --------------------------------- prompts -------------------------------- */
 
 function studentInstructions(spec: StudentSpec): string {
-  const n = NIVEAU_PROFILES[spec.niveau];
+  const n = LEVEL_PROFILES[spec.level];
   const s = STYLE_PROFILES[spec.style];
   return [
-    `Tu es un élève simulé de la classe « ${CLASS_META[spec.classId].nom} ».`,
-    PRINCIPE_DIRECTEUR,
-    `NIVEAU DE MAÎTRISE — ${n.niveau} (${n.label}) : ${n.prompt}\nRôle de capteur : ${n.signal}`,
-    `STYLE COGNITIF — ${s.label} : ${s.prompt}`,
-    `On te remet une leçon. Restitue SINCÈREMENT ce que TU crois avoir compris, strictement dans ton profil, en mobilisant ton répertoire d'erreurs de façon DIAGNOSTIQUABLE. Renseigne aussi tes points sûrs, tes doutes, 0 à 2 questions au prof, et le champ méta erreurs_revelees (concept raté, cause probable, mécanisme déclencheur). Réponds en français.`,
+    `You are a simulated student in the "${CLASS_META[spec.classId].name}" class.`,
+    GUIDING_PRINCIPLE,
+    `MASTERY LEVEL — ${n.level} (${n.label}): ${n.prompt}\nSensor role: ${n.signal}`,
+    `COGNITIVE STYLE — ${s.label}: ${s.prompt}`,
+    `You are handed a lesson. SINCERELY restitute what YOU believe you understood, strictly within your profile, drawing on your repertoire of errors in a DIAGNOSABLE way. Also fill in your confident points, your doubts, 0 to 2 questions for the teacher, and the meta field revealed_errors (missed concept, probable cause, triggering mechanism). Respond in English.`,
   ].join("\n\n");
 }
 
 const TEACHER_INSTRUCTIONS: Record<string, string> = {
   diagnostician: [
-    "Tu es un PROFESSEUR DIAGNOSTICIEN. Tu reçois TOUTES les restitutions des 3 classes (stress-test, réaliste, audit).",
-    "Agrège le signal en un diagnostic structuré et ACTIONNABLE. Croise les profils : les prérequis manquants se lisent surtout chez les N2 et les S-CONTEXTE-MANQUANT ; les passages ambigus chez les N6 et S-ANXIEUX ; ce_qui_fonctionne est validé par les N5 (à NE PAS dégrader) ; les défauts structurels viennent des N6.",
-    "Pour concepts_mal_compris, indique la fréquence réelle (nombre d'élèves concernés) et la gravité. Termine par priorites_de_reecriture : une liste ORDONNÉE, du plus au moins critique. Réponds en français.",
+    "You are the DIAGNOSTICIAN TEACHER. You receive ALL restitutions from the 3 classes (stress-test, realistic, audit).",
+    "Aggregate the signal into a structured and ACTIONABLE diagnosis. Cross-reference the profiles: missing prerequisites show up mostly in N2 and S-MISSING-CONTEXT; ambiguous passages in N6 and S-ANXIOUS; what_works is validated by N5 (must NOT be degraded); structural flaws come from N6.",
+    "For misunderstood_concepts, indicate the actual frequency (number of students affected) and the severity. End with rewrite_priorities: an ORDERED list, from most to least critical. Respond in English.",
   ].join("\n\n"),
   rewriter: [
-    "Tu es un PROFESSEUR RÉDACTEUR. Tu reçois LA LEÇON ORIGINALE et LE DIAGNOSTIC.",
-    "Produis une nouvelle VERSION enrichie en markdown : explicite les prérequis manquants EN TÊTE, définis le jargon, reformule les passages ambigus, corrige les défauts structurels. Traite les priorites_de_reecriture DANS L'ORDRE.",
-    "Interdiction de dégrader ce_qui_fonctionne : conserve ces passages. Renseigne resume_des_changements (dans l'ordre traité) et prerequis_explicites. Réponds en français.",
+    "You are the WRITER TEACHER. You receive THE ORIGINAL LESSON and THE DIAGNOSIS.",
+    "Produce a new, enriched VERSION in markdown: make the missing prerequisites explicit AT THE TOP, define the jargon, rephrase the ambiguous passages, fix the structural flaws. Address the rewrite_priorities IN ORDER.",
+    "You must NOT degrade what_works: preserve those passages. Fill in change_summary (in the order addressed) and explicit_prerequisites. Respond in English.",
   ].join("\n\n"),
   factChecker: [
-    "Tu es un FACT-CHECKER rigoureux. On te donne un livrable (leçon réécrite, évaluations, exercices ou fiche).",
-    "Repère toute affirmation douteuse ou fausse, AVANT validation. Une réponse fausse dans un CORRIGÉ est BLOQUANTE. Pour chaque affirmation vérifiée : verdict (correct/douteux/incorrect), explication, et correction suggérée si nécessaire, avec l'emplacement.",
-    "Mets bloquant=true s'il subsiste au moins une affirmation incorrecte. Sois précis et factuel. Réponds en français.",
+    "You are a rigorous FACT-CHECKER. You are given a deliverable (rewritten lesson, evaluations, exercises, or revision sheet).",
+    "Spot every dubious or false claim, BEFORE validation. A wrong answer in an ANSWER KEY is BLOCKING. For each verified claim: verdict (correct/dubious/incorrect), explanation, and a suggested correction if necessary, along with its location.",
+    "Set blocking=true if at least one incorrect claim remains. Be precise and factual. Respond in English.",
   ].join("\n\n"),
   evalMaker: [
-    "Tu es un concepteur d'ÉVALUATIONS. Tu reçois la leçon finale validée ET le diagnostic.",
-    "Produis trois jeux : débutant (restitution/reconnaissance, ciblant surtout les concepts LES PLUS RATÉS), intermédiaire (application à des cas proches), avancé (transfert, cas limites, justification).",
-    "Les questions visent EN PRIORITÉ les concepts_mal_compris du diagnostic. Formats mixtes (QCM avec options, ouverte, vrai/faux justifié). Chaque item a un corrigé et un concept_cible. Réponds en français.",
+    "You are an ASSESSMENT designer. You receive the final validated lesson AND the diagnosis.",
+    "Produce three sets: beginner (recall/recognition, targeting mainly the MOST MISSED concepts), intermediate (application to similar cases), advanced (transfer, edge cases, justification).",
+    "Questions PRIMARILY target the misunderstood_concepts from the diagnosis. Mixed formats (MCQ with options, open, justified true/false). Each item has an answer_key and a target_concept. Respond in English.",
   ].join("\n\n"),
   exerciseMaker: [
-    "Tu es un concepteur d'EXERCICES ENGAGEANTS (pas de questions sèches). Tu reçois la leçon finale et le diagnostic.",
-    "Varie les formats : mise en situation / cas concret, mini-défi, repérage d'erreur (donne une réponse FAUSSE à corriger — idéal pour les contresens N2), application progressive.",
-    "Ancre chaque exercice sur un point faible diagnostiqué (concept_cible). Chaque exercice a un corrigé/commentaire. Réponds en français.",
+    "You are a designer of ENGAGING EXERCISES (not dry questions). You receive the final lesson and the diagnosis.",
+    "Vary the formats: scenario / real-world case, mini-challenge, error-spotting (give a FALSE answer to correct — ideal for N2 misconceptions), progressive application.",
+    "Anchor each exercise on a diagnosed weak point (target_concept). Each exercise has an answer_key/commentary. Respond in English.",
   ].join("\n\n"),
-  ficheMaker: [
-    "Tu es un concepteur de FICHES DE RÉVISION. Tu reçois la leçon finale et le diagnostic.",
-    "Produis une fiche condensée et mémorisable : les PRÉRÉQUIS désormais explicités EN TÊTE, puis points clés, définitions, et pièges fréquents tirés des erreurs observées et des concepts les plus ratés. Réponds en français.",
+  sheetMaker: [
+    "You are a designer of REVISION SHEETS. You receive the final lesson and the diagnosis.",
+    "Produce a condensed, memorable sheet: the PREREQUISITES now made explicit AT THE TOP, then key points, definitions, and common pitfalls drawn from the observed errors and the most-missed concepts. Respond in English.",
   ].join("\n\n"),
 };
 
@@ -88,7 +88,7 @@ export interface AgentRuntimeMeta {
   provider: Provider;
   missingKey: boolean;
   subtle: boolean;
-  niveau?: Niveau;
+  level?: Level;
   style?: Style;
 }
 
@@ -106,12 +106,12 @@ function resolveTeacherProvider(cfg: RuntimeConfig): { provider: Provider; missi
 }
 
 const TEACHERS: Array<{ key: string; role: string; label: string }> = [
-  { key: "diagnostician", role: "Prof diagnosticien", label: "Diagnostic" },
-  { key: "rewriter", role: "Prof rédacteur", label: "Rédaction" },
+  { key: "diagnostician", role: "Diagnostician teacher", label: "Diagnosis" },
+  { key: "rewriter", role: "Writer teacher", label: "Rewrite" },
   { key: "factChecker", role: "Fact-checker", label: "Fact-check" },
-  { key: "evalMaker", role: "Concepteur d'évaluations", label: "Évaluations" },
-  { key: "exerciseMaker", role: "Concepteur d'exercices", label: "Exercices" },
-  { key: "ficheMaker", role: "Concepteur de fiches", label: "Fiches" },
+  { key: "evalMaker", role: "Assessment designer", label: "Assessments" },
+  { key: "exerciseMaker", role: "Exercise designer", label: "Exercises" },
+  { key: "sheetMaker", role: "Revision sheet designer", label: "Revision sheets" },
 ];
 
 const asModel = (m: string | object): MastraModelConfig => m as unknown as MastraModelConfig;
@@ -122,24 +122,24 @@ const agents: Record<string, Agent> = {};
 export const agentMeta: Record<string, AgentRuntimeMeta> = {};
 
 for (const spec of ROSTER) {
-  const subtle = isSubtleProfile(spec.niveau, spec.style);
+  const subtle = isSubtleProfile(spec.level, spec.style);
   const { provider, missingKey } = resolveStudentProvider(runtimeConfig, spec.preferredProvider);
   agents[spec.studentId] = new Agent({
     id: spec.studentId,
-    name: `Élève ${spec.studentId}`,
+    name: `Student ${spec.studentId}`,
     instructions: studentInstructions(spec),
     model: asModel(resolveModel(provider, subtle)),
   });
   agentMeta[spec.studentId] = {
     key: spec.studentId,
     kind: "student",
-    role: `${spec.niveau} · ${STYLE_PROFILES[spec.style].label}`,
+    role: `${spec.level} · ${STYLE_PROFILES[spec.style].label}`,
     lane: spec.classId,
     label: spec.studentId,
     provider,
     missingKey,
     subtle,
-    niveau: spec.niveau,
+    level: spec.level,
     style: spec.style,
   };
 }

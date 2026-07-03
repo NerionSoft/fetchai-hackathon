@@ -51,7 +51,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
             r = await client.post(f"{MASTRA_APP_URL}/api/agent", json={"markdown": text})
             r.raise_for_status()
             data = r.json()
-        answer = data.get("dossier_markdown") or data.get("error") or "(réponse vide)"
+        answer = data.get("dossier_markdown") or data.get("error") or "(empty response)"
     except Exception as e:
         ctx.logger.exception("ClassroomSim backend call failed")
         answer = f"⚠️ error: {e}"

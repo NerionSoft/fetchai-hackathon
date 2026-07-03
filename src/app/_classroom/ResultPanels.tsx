@@ -8,7 +8,7 @@
 import { useMemo, useState } from "react";
 
 import { buildMarkdown, buildPrintableHtml, exportFilename } from "@/classroom/export";
-import { dossierPdf, evaluationsPdf, exercicesPdf, fichePdf, lessonPdf, savePdf } from "@/classroom/pdf";
+import { dossierPdf, evaluationsPdf, exercisesPdf, sheetPdf, lessonPdf, savePdf } from "@/classroom/pdf";
 import type { FactCheckReport } from "@/classroom/schemas";
 import type { RunState } from "./use-classroom-run";
 
@@ -33,26 +33,26 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 const verdictColor: Record<string, string> = {
   correct: "#16a34a",
-  douteux: "#d97706",
+  dubious: "#d97706",
   incorrect: "#dc2626",
 };
 
 function FactCheck({ report }: { report: FactCheckReport }) {
   return (
     <div style={{ marginBottom: 10, fontSize: 13 }}>
-      <strong>{report.cible}</strong>{" "}
-      {report.bloquant ? (
-        <span style={{ color: "#dc2626", fontWeight: 700 }}>⛔ bloquant</span>
+      <strong>{report.target}</strong>{" "}
+      {report.blocking ? (
+        <span style={{ color: "#dc2626", fontWeight: 700 }}>⛔ blocking</span>
       ) : (
-        <span style={{ color: "#16a34a" }}>✓ validé</span>
+        <span style={{ color: "#16a34a" }}>✓ validated</span>
       )}
-      <p style={{ margin: "4px 0", color: "#444" }}>{report.synthese}</p>
+      <p style={{ margin: "4px 0", color: "#444" }}>{report.summary}</p>
       <ul style={{ margin: 0, paddingLeft: 18 }}>
         {report.claims.map((c, i) => (
           <li key={i} style={{ marginBottom: 3 }}>
             <span style={{ color: verdictColor[c.verdict] ?? "#444", fontWeight: 600 }}>[{c.verdict}]</span>{" "}
-            {c.affirmation} — <em style={{ color: "#666" }}>{c.explication}</em>
-            {c.correction_suggeree ? <span style={{ color: "#7c3aed" }}> → {c.correction_suggeree}</span> : null}
+            {c.claim} — <em style={{ color: "#666" }}>{c.explanation}</em>
+            {c.suggested_correction ? <span style={{ color: "#7c3aed" }}> → {c.suggested_correction}</span> : null}
           </li>
         ))}
       </ul>
@@ -82,7 +82,7 @@ export function ResultPanels({ state }: { state: RunState }) {
 
   const hasAny = diagnosis || lessonVersion || factCheckLesson || production;
   if (!hasAny) {
-    return <p style={{ color: "#6b7280", fontSize: 14 }}>Les résultats s’afficheront ici au fil de la boucle…</p>;
+    return <p style={{ color: "#6b7280", fontSize: 14 }}>Results will appear here as the loop runs…</p>;
   }
 
   return (
@@ -91,34 +91,34 @@ export function ResultPanels({ state }: { state: RunState }) {
         <Panel title="Exports">
           <label style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, marginBottom: 12, color: "var(--muted)" }}>
             <input type="checkbox" checked={withCorr} onChange={(e) => setWithCorr(e.target.checked)} />
-            Inclure les corrigés
+            Include answer keys
           </label>
 
           <div style={subLabel}>PDF</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
             <button style={btn} onClick={() => savePdf(dossierPdf(loopResult, withCorr), loopResult, "dossier")}>
-              Dossier complet
+              Full dossier
             </button>
-            <button style={btn} onClick={() => savePdf(lessonPdf(loopResult), loopResult, "lecon")}>
-              Leçon
+            <button style={btn} onClick={() => savePdf(lessonPdf(loopResult), loopResult, "lesson")}>
+              Lesson
             </button>
             <button style={btn} onClick={() => savePdf(evaluationsPdf(loopResult, withCorr), loopResult, "evaluations")}>
-              Évaluations
+              Evaluations
             </button>
-            <button style={btn} onClick={() => savePdf(exercicesPdf(loopResult, withCorr), loopResult, "exercices")}>
-              Exercices
+            <button style={btn} onClick={() => savePdf(exercisesPdf(loopResult, withCorr), loopResult, "exercises")}>
+              Exercises
             </button>
-            <button style={btn} onClick={() => savePdf(fichePdf(loopResult), loopResult, "fiche")}>
-              Fiche de révision
+            <button style={btn} onClick={() => savePdf(sheetPdf(loopResult), loopResult, "sheet")}>
+              Revision sheet
             </button>
           </div>
 
-          <div style={subLabel}>Autres formats</div>
+          <div style={subLabel}>Other formats</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
               style={ghost}
               onClick={() =>
-                download(`${exportFilename(loopResult)}.md`, "text/markdown", buildMarkdown(loopResult, { includeCorriges: withCorr }))
+                download(`${exportFilename(loopResult)}.md`, "text/markdown", buildMarkdown(loopResult, { includeAnswerKeys: withCorr }))
               }
             >
               Markdown
@@ -126,51 +126,51 @@ export function ResultPanels({ state }: { state: RunState }) {
             <button
               style={ghost}
               onClick={() =>
-                download(`${exportFilename(loopResult)}.html`, "text/html", buildPrintableHtml(loopResult, { includeCorriges: withCorr }))
+                download(`${exportFilename(loopResult)}.html`, "text/html", buildPrintableHtml(loopResult, { includeAnswerKeys: withCorr }))
               }
             >
-              HTML imprimable
+              Printable HTML
             </button>
           </div>
         </Panel>
       )}
 
       {diagnosis && (
-        <Panel title="Diagnostic">
-          <h4 style={h4}>Concepts mal compris</h4>
+        <Panel title="Diagnosis">
+          <h4 style={h4}>Misunderstood concepts</h4>
           <ul style={ul}>
-            {diagnosis.concepts_mal_compris.map((c, i) => (
+            {diagnosis.misunderstood_concepts.map((c, i) => (
               <li key={i}>
-                <strong>{c.concept}</strong> — gravité {c.gravite}, {c.frequence} élève(s){" "}
-                <span style={{ color: "#6b7280" }}>[{c.niveaux_concernes.join(", ")}]</span>
+                <strong>{c.concept}</strong> — severity {c.severity}, {c.frequency} student(s){" "}
+                <span style={{ color: "#6b7280" }}>[{c.affected_levels.join(", ")}]</span>
               </li>
             ))}
           </ul>
-          <h4 style={h4}>Prérequis manquants</h4>
+          <h4 style={h4}>Missing prerequisites</h4>
           <ul style={ul}>
-            {diagnosis.prerequis_manquants.map((p, i) => (
+            {diagnosis.missing_prerequisites.map((p, i) => (
               <li key={i}>
-                <strong>{p.prerequis}</strong> — <em style={{ color: "#666" }}>{p.preuve}</em>
+                <strong>{p.prerequisite}</strong> — <em style={{ color: "#666" }}>{p.evidence}</em>
               </li>
             ))}
           </ul>
-          <h4 style={h4}>Passages ambigus</h4>
+          <h4 style={h4}>Ambiguous passages</h4>
           <ul style={ul}>
-            {diagnosis.passages_ambigus.map((p, i) => (
+            {diagnosis.ambiguous_passages.map((p, i) => (
               <li key={i}>
-                « {p.extrait} » — {p.probleme}
+                "{p.excerpt}" — {p.problem}
               </li>
             ))}
           </ul>
-          <h4 style={h4}>Ce qui fonctionne (à préserver)</h4>
+          <h4 style={h4}>What works (to preserve)</h4>
           <ul style={ul}>
-            {diagnosis.ce_qui_fonctionne.map((s, i) => (
+            {diagnosis.what_works.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
           </ul>
-          <h4 style={h4}>Priorités de réécriture</h4>
+          <h4 style={h4}>Rewrite priorities</h4>
           <ol style={ul}>
-            {diagnosis.priorites_de_reecriture.map((s, i) => (
+            {diagnosis.rewrite_priorities.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
           </ol>
@@ -178,24 +178,24 @@ export function ResultPanels({ state }: { state: RunState }) {
       )}
 
       {lessonVersion && (
-        <Panel title="Leçon réécrite (diff vs original)">
-          {lessonVersion.prerequis_explicites.length > 0 && (
+        <Panel title="Rewritten lesson (diff vs original)">
+          {lessonVersion.explicit_prerequisites.length > 0 && (
             <>
-              <h4 style={h4}>Prérequis désormais explicités</h4>
+              <h4 style={h4}>Prerequisites now made explicit</h4>
               <ul style={ul}>
-                {lessonVersion.prerequis_explicites.map((p, i) => (
+                {lessonVersion.explicit_prerequisites.map((p, i) => (
                   <li key={i}>{p}</li>
                 ))}
               </ul>
             </>
           )}
-          <h4 style={h4}>Changements</h4>
+          <h4 style={h4}>Changes</h4>
           <ul style={ul}>
-            {lessonVersion.resume_des_changements.map((c, i) => (
+            {lessonVersion.change_summary.map((c, i) => (
               <li key={i}>{c}</li>
             ))}
           </ul>
-          <h4 style={h4}>Nouvelle version</h4>
+          <h4 style={h4}>New version</h4>
           <pre style={pre}>
             {lessonVersion.markdown.split("\n").map((line, i) => {
               const isNew = added.has(line.trim()) && line.trim().length > 0;
@@ -220,32 +220,32 @@ export function ResultPanels({ state }: { state: RunState }) {
       )}
 
       {production && (
-        <Panel title="Supports pédagogiques">
-          <h4 style={h4}>Évaluations</h4>
-          {(["debutant", "intermediaire", "avance"] as const).map((lvl) => (
+        <Panel title="Teaching materials">
+          <h4 style={h4}>Evaluations</h4>
+          {(["beginner", "intermediate", "advanced"] as const).map((lvl) => (
             <div key={lvl} style={{ marginBottom: 8 }}>
               <strong style={{ textTransform: "capitalize" }}>{lvl}</strong>
               <ul style={ul}>
                 {production.evaluations[lvl].items.map((it, i) => (
                   <li key={i}>
-                    <span style={{ color: "#6b7280" }}>({it.type})</span> {it.enonce}{" "}
-                    <em style={{ color: "#7c3aed" }}>→ {it.concept_cible}</em>
+                    <span style={{ color: "#6b7280" }}>({it.type})</span> {it.statement}{" "}
+                    <em style={{ color: "#7c3aed" }}>→ {it.target_concept}</em>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-          <h4 style={h4}>Exercices</h4>
+          <h4 style={h4}>Exercises</h4>
           <ul style={ul}>
-            {production.exercices.exercices.map((ex, i) => (
+            {production.exercises.exercises.map((ex, i) => (
               <li key={i}>
-                <strong>{ex.titre}</strong> <span style={{ color: "#6b7280" }}>({ex.format})</span> — {ex.enonce}
+                <strong>{ex.title}</strong> <span style={{ color: "#6b7280" }}>({ex.format})</span> — {ex.statement}
               </li>
             ))}
           </ul>
-          <h4 style={h4}>Fiche de révision — {production.fiche.titre}</h4>
+          <h4 style={h4}>Revision sheet — {production.sheet.title}</h4>
           <ul style={ul}>
-            {production.fiche.pieges_frequents.map((p, i) => (
+            {production.sheet.common_pitfalls.map((p, i) => (
               <li key={i}>⚠️ {p}</li>
             ))}
           </ul>

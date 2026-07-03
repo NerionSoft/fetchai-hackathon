@@ -11,9 +11,9 @@ import { z } from "zod";
 
 import {
   EvaluationSetSchema,
-  ExerciceSetSchema,
+  ExerciseSetSchema,
   FactCheckReportSchema,
-  FicheRevisionSchema,
+  RevisionSheetSchema,
   type FactCheckReport,
   type Lesson,
   LessonSchema,
@@ -34,9 +34,9 @@ import { agentMeta } from "./agents";
 import {
   buildDiagnosis,
   buildEvaluations,
-  buildExercices,
+  buildExercises,
   buildFactCheck,
-  buildFiche,
+  buildSheet,
   buildRewrite,
   buildStudent,
   productionPartToText,
@@ -57,7 +57,7 @@ const simulateStep = createStep({
   outputSchema: z.object({ restitutions: z.array(StudentRestitutionSchema) }),
   execute: async ({ inputData }) => {
     const { lesson, runId } = inputData as Init;
-    getEmitter(runId)({ type: "phase", phase: "simulate", label: "Simulation des classes" });
+    getEmitter(runId)({ type: "phase", phase: "simulate", label: "Simulating the classes" });
 
     const results = await mapPool(ROSTER, CONCURRENCY, async (spec) => {
       const meta = agentMeta[spec.studentId];
@@ -66,7 +66,7 @@ const simulateStep = createStep({
         agentKey: spec.studentId,
         schema: StudentRestitutionSchema,
         prompt: buildStudent(spec, meta.provider, lesson),
-        summary: (x) => x.ce_que_jai_compris,
+        summary: (x) => x.what_i_understood,
       });
       if (!r) return null;
       // Pin the identity/profile fields to the known truth.
@@ -74,7 +74,7 @@ const simulateStep = createStep({
         ...r,
         studentId: spec.studentId,
         classId: spec.classId,
-        niveau: spec.niveau,
+        level: spec.level,
         style: spec.style,
         provider: meta.provider,
       } satisfies StudentRestitution;
@@ -82,7 +82,7 @@ const simulateStep = createStep({
 
     const restitutions = results.filter((x): x is StudentRestitution => x !== null);
     if (restitutions.length === 0) {
-      throw new Error("Aucune restitution produite — vérifie les clés API ou active le mode mock.");
+      throw new Error("No restitution was produced — check the API keys or enable mock mode.");
     }
     return { restitutions };
   },
@@ -96,13 +96,13 @@ const diagnoseStep = createStep({
   outputSchema: z.object({ diagnosis: TeacherDiagnosisSchema }),
   execute: async ({ inputData, getInitData }) => {
     const { lesson, runId } = getInitData() as Init;
-    getEmitter(runId)({ type: "phase", phase: "diagnose", label: "Diagnostic" });
+    getEmitter(runId)({ type: "phase", phase: "diagnose", label: "Diagnosis" });
     const diagnosis = await callTeacher({
       runId,
       agentKey: "diagnostician",
       schema: TeacherDiagnosisSchema,
       prompt: buildDiagnosis(lesson, inputData.restitutions),
-      summary: (d) => d.priorites_de_reecriture[0] ?? "Diagnostic produit",
+      summary: (d) => d.rewrite_priorities[0] ?? "Diagnosis produced",
     });
     getEmitter(runId)({ type: "result", payload: { kind: "diagnosis", data: diagnosis } });
     return { diagnosis };
@@ -117,13 +117,13 @@ const rewriteStep = createStep({
   outputSchema: z.object({ lessonVersion: LessonVersionSchema }),
   execute: async ({ inputData, getInitData }) => {
     const { lesson, runId } = getInitData() as Init;
-    getEmitter(runId)({ type: "phase", phase: "rewrite", label: "Réécriture" });
+    getEmitter(runId)({ type: "phase", phase: "rewrite", label: "Rewrite" });
     const lessonVersion = await callTeacher({
       runId,
       agentKey: "rewriter",
       schema: LessonVersionSchema,
       prompt: buildRewrite(lesson, inputData.diagnosis),
-      summary: (v) => v.resume_des_changements[0] ?? v.title,
+      summary: (v) => v.change_summary[0] ?? v.title,
     });
     getEmitter(runId)({ type: "result", payload: { kind: "lessonVersion", data: lessonVersion } });
     return { lessonVersion };
@@ -138,13 +138,13 @@ const factCheckLessonStep = createStep({
   outputSchema: z.object({ factCheckLesson: FactCheckReportSchema }),
   execute: async ({ inputData, getInitData }) => {
     const { runId } = getInitData() as Init;
-    getEmitter(runId)({ type: "phase", phase: "factcheck-lesson", label: "Fact-check de la leçon" });
+    getEmitter(runId)({ type: "phase", phase: "factcheck-lesson", label: "Fact-checking the lesson" });
     const factCheckLesson = await callTeacher({
       runId,
       agentKey: "factChecker",
       schema: FactCheckReportSchema,
       prompt: buildFactCheck("lesson", inputData.lessonVersion.title, inputData.lessonVersion.markdown),
-      summary: (f) => f.synthese,
+      summary: (f) => f.summary,
     });
     getEmitter(runId)({ type: "result", payload: { kind: "factCheckLesson", data: factCheckLesson } });
     return { factCheckLesson };
@@ -161,35 +161,35 @@ const produceStep = createStep({
     const { lesson, runId } = getInitData() as Init;
     const { diagnosis } = getStepResult("diagnose") as { diagnosis: TeacherDiagnosis };
     const { lessonVersion } = getStepResult("rewrite") as { lessonVersion: LessonVersion };
-    getEmitter(runId)({ type: "phase", phase: "produce", label: "Production pédagogique" });
+    getEmitter(runId)({ type: "phase", phase: "produce", label: "Pedagogical production" });
 
     const finalLesson: Lesson = { id: lesson.id, title: lessonVersion.title, markdown: lessonVersion.markdown };
 
-    const [evaluations, exercices, fiche] = await Promise.all([
+    const [evaluations, exercises, sheet] = await Promise.all([
       callTeacher({
         runId,
         agentKey: "evalMaker",
         schema: EvaluationSetSchema,
         prompt: buildEvaluations(finalLesson, diagnosis),
-        summary: () => "Évaluations 3 niveaux générées",
+        summary: () => "3-level assessments generated",
       }),
       callTeacher({
         runId,
         agentKey: "exerciseMaker",
-        schema: ExerciceSetSchema,
-        prompt: buildExercices(finalLesson, diagnosis),
-        summary: (e) => `${e.exercices.length} exercices générés`,
+        schema: ExerciseSetSchema,
+        prompt: buildExercises(finalLesson, diagnosis),
+        summary: (e) => `${e.exercises.length} exercises generated`,
       }),
       callTeacher({
         runId,
-        agentKey: "ficheMaker",
-        schema: FicheRevisionSchema,
-        prompt: buildFiche(finalLesson, diagnosis),
-        summary: (f) => f.titre,
+        agentKey: "sheetMaker",
+        schema: RevisionSheetSchema,
+        prompt: buildSheet(finalLesson, diagnosis),
+        summary: (f) => f.title,
       }),
     ]);
 
-    const production: PedagogicalProduction = { evaluations, exercices, fiche };
+    const production: PedagogicalProduction = { evaluations, exercises, sheet };
     getEmitter(runId)({ type: "result", payload: { kind: "production", data: production } });
     return { production };
   },
@@ -204,17 +204,17 @@ const factCheckProductionStep = createStep({
   execute: async ({ inputData, getInitData, getStepResult }) => {
     const { lesson, runId } = getInitData() as Init;
     const emit = getEmitter(runId);
-    emit({ type: "phase", phase: "factcheck-production", label: "Fact-check des supports" });
+    emit({ type: "phase", phase: "factcheck-production", label: "Fact-checking the materials" });
 
     const { production } = inputData;
     const reports: FactCheckReport[] = [];
-    for (const part of ["evaluations", "exercices", "fiche"] as const) {
+    for (const part of ["evaluations", "exercises", "sheet"] as const) {
       const rep = await callTeacher({
         runId,
         agentKey: "factChecker",
         schema: FactCheckReportSchema,
         prompt: buildFactCheck(part, part, productionPartToText(production, part)),
-        summary: (f) => f.synthese,
+        summary: (f) => f.summary,
       });
       reports.push(rep);
     }

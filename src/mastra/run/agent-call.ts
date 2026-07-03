@@ -39,13 +39,13 @@ export async function runAgentStreamed<T>(params: {
   const agent = mastraAgents[agentKey];
   const userText = mock ? prompt.human + encodeBrief(prompt.brief) : prompt.human;
 
-  emit({ type: "agent-status", agentId: agentKey, status: "reflechit" });
+  emit({ type: "agent-status", agentId: agentKey, status: "thinking" });
 
   const result = (await (mock
     ? agent.stream(userText)
     : agent.stream(userText, { structuredOutput: { schema } }))) as unknown as ModelOutput;
 
-  emit({ type: "agent-status", agentId: agentKey, status: "parle" });
+  emit({ type: "agent-status", agentId: agentKey, status: "speaking" });
 
   const reader = result.fullStream.getReader();
   try {

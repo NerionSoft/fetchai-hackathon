@@ -1,486 +1,187 @@
-> 🎓 **Ce dépôt héberge ClassroomSim** — une boucle d'amélioration pédagogique agentique (Mastra).
-> **→ Voir [`README.classroomsim.md`](./README.classroomsim.md)** pour le démarrage (`pnpm install && pnpm dev`, zéro clé API requise).
-> Le contenu ci-dessous documente le starter NerionSoft d'origine.
+<div align="center">
+
+<img src="docs/koro-logo.svg" alt="Koro — ClassroomSim" width="620" />
+
+### The best AI teaching assistant on Agentverse — turn any raw lesson into a classroom-ready, diagnosed, fact-checked pedagogical dossier.
+
+**A real multi-agent simulation:** 15–18 student-agents re-explain your lesson to expose where it fails, teacher-agents diagnose the gaps, rewrite, fact-check, and generate quizzes, exercises & a revision sheet — live, token by token.
+
+<br/>
+
+<!-- Hackathon / collaboration -->
+[![Fetch.ai Hackathon](https://img.shields.io/badge/Fetch.ai-Hackathon_ASE--1-4B0082)](https://fetch.ai)
+[![In collaboration with Bittensor](https://img.shields.io/badge/in_collaboration_with-Bittensor-00CCB3)](https://bittensor.com)
+[![Agentverse](https://img.shields.io/badge/Agentverse-registered-3D8BD3)](https://agentverse.ai)
+[![ASI:One](https://img.shields.io/badge/ASI:One-discoverable-3D8BD3)](https://asi1.ai)
+[![Mastra](https://img.shields.io/badge/Mastra-agentic_runtime-000000)](https://mastra.ai)
+
+<!-- Engineering seriousness — this is not vibe-coded -->
+[![CI](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/ci.yml/badge.svg)](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/ci.yml)
+[![Release](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/release.yml/badge.svg)](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/release.yml)
+![SonarQube](https://img.shields.io/badge/SonarQube-quality_gate-4E9BCD?logo=sonarqube&logoColor=white)
+![Type-safe](https://img.shields.io/badge/end--to--end-Zod_typed-3E67B1?logo=zod&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-Vitest_+_Playwright-6E9F18?logo=vitest&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-informational)
+
+<!-- Stack -->
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Python](https://img.shields.io/badge/uAgents-Python-3776AB?logo=python&logoColor=white)
+![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-≥24-339933?logo=node.js&logoColor=white)
+
+</div>
 
 ---
 
-# Platform Starter Next.js
+> **Fetch.ai Hackathon · ASE-1 (hosted with Bittensor).** Koro is our submission: a genuine agentic system — not an API wrapper — that plugs a typed **Mastra** multi-agent workflow into the **Fetch.ai** ecosystem through the **uAgents Chat Protocol**, so any teacher can talk to it from **ASI:One** in plain language.
 
-| CI/CD | Stack | Qualite | Tooling |
-|---|---|---|---|
-| [![CI](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/ci.yml/badge.svg)](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/ci.yml) [![Release](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/release.yml/badge.svg)](https://github.com/NerionSoft/platform-starter-nextjs/actions/workflows/release.yml) | ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white) ![Better Auth](https://img.shields.io/badge/Better_Auth-1.6-22c55e) ![Zod](https://img.shields.io/badge/Zod-4-3E67B1?logo=zod&logoColor=white) ![Pino](https://img.shields.io/badge/Pino-10-687634) | ![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white) ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white) ![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/Prettier-3-F7B93E?logo=prettier&logoColor=black) ![SonarQube](https://img.shields.io/badge/SonarQube-integrated-4E9BCD?logo=sonarqube&logoColor=white) | ![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-≥24-339933?logo=node.js&logoColor=white) |
+## Table of contents
 
----
-
-Template de demarrage Next.js de NerionSoft, avec architecture hexagonale, authentification, CI/CD centralisee et qualite de code integree.
-
-## Table des matieres
-
-- [Demarrage rapide](#demarrage-rapide)
-- [Script de setup](#script-de-setup)
+- [Why Koro](#why-koro)
+- [Highlights](#highlights)
 - [Architecture](#architecture)
-- [Conventions](#conventions)
-- [CI/CD](#cicd)
-- [Les a priori du starter](#les-a-priori-du-starter)
-- [Documentation](#documentation)
+- [Quick start](#quick-start-zero-api-keys)
+- [Talk to it on Fetch.ai (Agentverse / ASI:One)](#talk-to-it-on-fetchai-agentverse--asione)
+- [How it works](#how-it-works)
+- [Configuration](#configuration)
+- [Tech stack](#tech-stack)
+- [Engineering rigor](#engineering-rigor--not-vibe-coded)
+- [Deeper docs](#deeper-docs)
 
 ---
 
-## Demarrage rapide
+## Why Koro
 
-```bash
-# 1. Cloner le repo
-git clone https://github.com/NerionSoft/platform-starter-nextjs.git
-cd platform-starter-nextjs
+A lesson can *read* perfectly and still *teach* badly. Koro finds the gap **before your students do**.
 
-# 2. Installer les dependances (lance aussi prisma generate via postinstall)
-pnpm install
+Drop in a lesson written in Markdown. Koro runs a **virtual classroom** of 15–18 student-agents — each a distinct *mastery level* (N0→N6) × *cognitive style* × *LLM provider* — who genuinely try to re-explain your lesson. Where they stumble is exactly where your lesson fails. Teacher-agents then **diagnose** the misconceptions, **rewrite** the lesson to fix them, **fact-check** every claim (a wrong answer key is blocking), and **produce** multi-level quizzes, exercises, and a revision sheet.
 
-# 3. Configurer l'environnement
-cp .env.example .env
-# Editer .env avec vos valeurs
+Everything is **diagnosis-driven**: every downstream artifact is conditioned on what the simulated students actually failed to understand — and it all renders **live**, token by token, in an SVG classroom scene.
 
-# 4. Lancer en dev
-pnpm dev
-```
+## Highlights
 
-### Variables d'environnement
-
-| Variable | Requis | Description |
-|---|---|---|
-| `DATABASE_URL` | Oui | Connection string PostgreSQL |
-| `BETTER_AUTH_SECRET` | Oui | Secret pour better-auth (`openssl rand -base64 32`) |
-| `NEXT_PUBLIC_APP_URL` | Non | URL publique de l'app (callbacks auth, cookies) |
-| `LOG_LEVEL` | Non | Niveau de log Pino (`debug`, `info`, `warn`, `error`) |
-
-### Scripts disponibles
-
-| Commande | Description |
-|---|---|
-| `pnpm dev` | Serveur de developpement |
-| `pnpm build` | Build de production |
-| `pnpm start` | Demarrage en production |
-| `pnpm lint` | Linting ESLint |
-| `pnpm format` | Formatage Prettier |
-| `pnpm format:check` | Verification du formatage |
-| `pnpm test` | Tests unitaires (Vitest) |
-| `pnpm test:watch` | Tests en mode watch |
-| `pnpm test:coverage` | Tests avec couverture (V8 + LCOV) |
-| `pnpm test:e2e` | Tests end-to-end (Playwright) |
-| `pnpm auth:generate` | Generer le schema Prisma depuis la config auth |
-
----
-
-## Script de setup
-
-A la creation d'un nouveau projet, le script interactif renomme l'hexagone d'exemple vers votre domaine metier :
-
-```bash
-node scripts/setup.mjs
-```
-
-Il demande :
-1. **Nom du projet** (pour `package.json`)
-2. **Description du projet**
-3. **Nom du premier domaine** (ex: `billing`)
-4. **Nom de la premiere entite** (ex: `invoice`)
-
-Le script effectue ensuite automatiquement :
-- Renommage de `example-hexagone/` vers `<domaine>/`
-- Remplacement de `Example`/`example` par votre entite (PascalCase, camelCase, UPPER_SNAKE)
-- Mise a jour des routes API : `/api/example-hexagone/v1/examples/` vers `/api/<domaine>/v1/<entites>/`
-- Mise a jour des imports, du schema Prisma et de `instrumentation.ts`
-
-Apres le setup, recherchez `TODO(starter)` dans le code pour trouver les points de personnalisation restants :
-
-```bash
-grep -r "TODO(starter)" src/
-```
-
----
+- 🧠 **Real multi-agent orchestration** — 18 student-agents + 6 teacher-agents on a typed Mastra workflow, Zod-validated at every step.
+- 🎭 **Diverse learner modeling** — three classes (stress-test · realistic room · quality audit); the subtlest profiles get the strongest models.
+- 🔴 **Live SVG scene** — watch each agent think and speak in real time via SSE streaming.
+- ✅ **Fact-checking as a safety net** — catches wrong claims and broken answer keys before they reach students.
+- 📄 **One-click exports** — PDF / Markdown / printable HTML, with separable answer keys.
+- 🌍 **Bilingual** — works seamlessly in French and English.
+- 🔌 **Fetch.ai native** — discoverable on Agentverse, callable from ASI:One via the standard Chat Protocol.
+- 💸 **Zero-key demo** — a deterministic mock provider runs the *entire* loop with no API keys and no database.
 
 ## Architecture
 
-Ce starter suit une **architecture hexagonale** (Ports & Adapters) organisee par bounded contexts appeles **hexagones**. L'objectif est de separer strictement la logique metier de l'infrastructure pour rendre le code testable, maintenable et independant des choix techniques.
-
-### Regle de dependance
-
-Les couches internes ne dependent jamais des couches externes :
-
-```mermaid
-block-beta
-  columns 1
-  block:infra["Infrastructure\n(frameworks, DB, HTTP, logging, runtime)"]:1
-  end
-  block:app["Application\n(use cases, DTOs, ports, queries)"]:1
-  end
-  block:domain["Domain\n(entites, value objects, erreurs metier)"]:1
-  end
-
-  infra --> app
-  app --> domain
-```
-
-### Structure des repertoires
-
-```
-src/
-├── app/                              # Next.js App Router (delivery)
-│   ├── api/
-│   │   ├── auth/[...all]/            #   Routes Better Auth
-│   │   └── <hexagone>/v1/<resource>/ #   Routes API versionnees par hexagone
-│   ├── layout.tsx                    #   Layout racine (fonts, Tailwind)
-│   ├── page.tsx                      #   Page d'accueil
-│   └── globals.css                   #   Styles globaux
-│
-├── <nom>-hexagone/                   # Un hexagone = un bounded context
-│   ├── domain/
-│   │   ├── entities/                 #   Entites (classes riches avec factory)
-│   │   ├── value-objects/            #   Enums, types valeur
-│   │   └── errors/                   #   Erreurs metier typees (DomainError)
-│   ├── application/
-│   │   ├── usecases/                 #   Cas d'usage (orchestration)
-│   │   ├── ports/                    #   Interfaces (contrats des adapters)
-│   │   ├── dto/                      #   Schemas de validation Zod
-│   │   └── queries/                  #   Filtres, tri, pagination
-│   ├── adapters/
-│   │   ├── in-memory/                #   Adapter memoire (tests, dev)
-│   │   ├── prisma/                   #   Adapter Prisma (production)
-│   │   │   ├── repositories/         #     Implementation des ports
-│   │   │   └── mappers/              #     Prisma row -> entite domaine
-│   │   └── http/                     #   Mapping erreur domaine -> HTTP
-│   └── <nom>.module.ts              #   Composition root (branche ports -> adapters)
-│
-├── infrastructure/                   # Couche technique transverse
-│   ├── auth/                         #   Better Auth (adapter concret)
-│   ├── config/                       #   Variables d'environnement (env.ts)
-│   ├── db/                           #   Client Prisma + Neon adapter
-│   ├── http/
-│   │   ├── api-handler.ts            #   HOF : logging, error handling, auth context
-│   │   └── proxy/                    #   Middleware Next.js (auth, headers, locale)
-│   ├── logging/                      #   Logger Pino avec correlation ID
-│   └── runtime/                      #   AsyncLocalStorage (request context)
-│
-├── presentation/                     # Couche UI
-│   ├── ui/
-│   │   ├── primitives/               #   Composants atomiques
-│   │   ├── compounds/                #   Composants composes
-│   │   └── layout/                   #   Composants de layout
-│   └── features/<feature>/
-│       ├── components/               #   Composants specifiques
-│       ├── hook/                     #   Hooks React
-│       └── state/                    #   Gestion d'etat locale
-│
-├── shared/                           # Code partage entre hexagones
-│   ├── auth/                         #   Port AuthContext + helpers
-│   ├── errors/                       #   DomainError (classe de base)
-│   ├── types/                        #   Types partages
-│   ├── hooks/                        #   Hooks React partages
-│   ├── lib/                          #   Utilitaires
-│   └── locales/                      #   Fichiers i18n (fr/, en/)
-│
-├── proxy.ts                          # Point d'entree du middleware
-└── instrumentation.ts                # Enregistrement des error mappings au demarrage
-
-tests/
-├── unit/usecases/                    # Tests unitaires des use cases
-├── integration/                      # Tests d'integration
-├── e2e/                              # Tests Playwright
-└── shared/{mocks,fixtures,utils}/    # Donnees de test partagees
-
-docs/
-├── architecture.md                   # Vue d'ensemble de l'architecture
-├── conventions.md                    # Conventions de nommage et code
-└── adr/                              # Architecture Decision Records
-    ├── 001-hexagonal-architecture.md
-    ├── 002-domain-error-pattern.md
-    ├── 003-registry-based-error-mapping.md
-    ├── 004-module-composition-root.md
-    ├── 005-pino-structured-logging.md
-    ├── 006-authentication-architecture.md
-    └── 007-environment-config-service.md
-```
-
-### Flux d'une requete API
-
-```mermaid
-flowchart TD
-  A["HTTP Request"] --> B["proxy.ts\n(middleware Next.js)"]
-  B -- "authProxy : verifie session,\nredirige si necessaire" --> C["app/api/‹hexagone›/v1/‹resource›/route.ts"]
-  C -- "apiHandler() : correlation ID,\nlogging, auth context, error handling" --> D["‹hexagone›.module.ts\nInstancie le use case avec le bon adapter"]
-  D --> E["application/usecases/‹action›.usecase.ts\nOrchestre la logique metier via les ports"]
-  E --> F["application/ports/‹entity›.repository.ts\n(interface)"]
-  F --> G["adapters/prisma/ ou in-memory/\nAccede a la BDD, mappe vers entite domaine"]
-  G --> H["Response JSON standardisee\n{ data | error { code, message, correlationId } }"]
-```
-
-### Utilite de chaque couche
-
-| Couche | Responsabilite | Depend de |
-|---|---|---|
-| **domain/** | Entites, regles metier, erreurs. Zero dependance externe. | Rien |
-| **application/** | Use cases, ports (interfaces), DTOs Zod. | domain/ |
-| **adapters/** | Implementations concretes des ports (Prisma, InMemory, HTTP mappings). | application/, domain/ |
-| **infrastructure/** | Auth, DB, logging, config, middleware. Generique, ne connait aucun hexagone. | Frameworks |
-| **presentation/** | Composants React, hooks, etat UI. | shared/ |
-| **shared/** | Primitives transverses : DomainError, AuthContext, types. | Rien |
-| **app/** | Routing Next.js. Colle entre infrastructure et hexagones. | Tout |
-
-### Direction des imports
-
 ```mermaid
 flowchart LR
-  shared["shared/"]
-  domain["domain/"]
-  application["application/"]
-  adapters["adapters/"]
-  module["module"]
-  infra["infrastructure/"]
-  routes["routes & instrumentation"]
+    User([👩‍🏫 Teacher]) -->|Markdown lesson| ASI[ASI:One / Agentverse]
+    ASI -->|ChatMessage| Bridge[Koro uAgent bridge<br/>Fetch.ai Chat Protocol]
+    Bridge -->|POST /api/agent| App[ClassroomSim<br/>Next.js 16 · App Router]
+    App --> WF
 
-  routes --> module
-  routes --> infra
-  module --> adapters
-  adapters --> application
-  adapters --> domain
-  adapters --> infra
-  application --> domain
-  domain --> shared
-  application --> shared
-  adapters --> shared
-  infra --> shared
-  module --> shared
-  routes --> shared
+    subgraph WF["Mastra workflow — typed &amp; Zod-validated"]
+      direction LR
+      SIM[simulate<br/>18 student-agents ∥] --> DIA[diagnose]
+      DIA --> REW[rewrite] --> FC1[factCheck lesson]
+      FC1 --> PRD[produce<br/>quiz · exercises · sheet ∥] --> FC2[factCheck production]
+    end
+
+    WF -->|dossier_markdown| App
+    App -.->|SSE token stream| Live[[🔴 Live SVG scene]]
+    App -->|dossier| Bridge -->|ChatMessage| ASI --> User
 ```
 
-**Interdit :**
-- `domain/` ne doit jamais importer depuis `application/`, `adapters/` ou `infrastructure/`
-- `application/` ne doit jamais importer depuis `adapters/` ou `infrastructure/`
-- `infrastructure/` ne doit jamais importer depuis un hexagone specifique
+The visual layer never constrains orchestration: `agent.stream()` text-deltas are re-emitted as SSE on a side channel keyed by `runId`. If rendering fails, results stay available as text.
 
----
+## Quick start (zero API keys)
 
-## Conventions
+By default Koro runs on a **deterministic mock provider** — the complete loop (18 student-agents + teacher-agents + live SVG + exportable materials) runs **without any API key and without a database**.
 
-### Nommage des fichiers
+```bash
+pnpm install      # also runs prisma generate via postinstall
+pnpm dev          # → http://localhost:3000
+```
 
-| Type | Convention | Exemple |
+1. Click **“Load the demo lesson”** (compound interest, with intentional flaws).
+2. Click **“Run the loop”**.
+3. Watch the 3 classes re-explain live, then diagnosis → rewrite → fact-check → materials appear. The full loop takes ~8 s in mock mode.
+4. Download the materials via the **export** buttons.
+
+> No `pnpm build` needed for the demo. Requires **Node ≥ 24** and **pnpm 11**.
+
+## Talk to it on Fetch.ai (Agentverse / ASI:One)
+
+The `agent/` folder is a **Fetch.ai uAgent** that bridges the ASI:One / Agentverse chat interface to the ClassroomSim backend.
+
+```bash
+cd agent
+pip install -r requirements.txt
+cp .env.example .env          # set AGENT_SEED (a long secret) and MASTRA_APP_URL
+python bridge.py              # auto-registers via mailbox, becomes ASI:One-discoverable
+```
+
+Then, from **ASI:One**, just paste a Markdown lesson:
+
+> *“Here is my lesson on compound interest — find what students will misunderstand, rewrite it, then give me quizzes and exercises.”*
+
+The agent acknowledges instantly and returns the full pedagogical dossier when the loop completes. See [`agent/README.agentverse.md`](agent/README.agentverse.md) for the public listing.
+
+## How it works
+
+| Stage | What happens |
+|---|---|
+| **simulate** | Three classes of student-agents re-explain the lesson *in parallel* (concurrency-bounded), exposing where it breaks. |
+| **diagnose** | A teacher-agent aggregates the signal: misconceptions (severity + frequency), missing prerequisites, ambiguous passages. |
+| **rewrite** | The lesson is rewritten to fix the diagnosed gaps — jargon defined, hidden prerequisites made explicit. |
+| **factCheck lesson** | Every claim in the rewritten lesson is verified. |
+| **produce** | Multi-level quizzes, exercises, and a revision sheet are generated *in parallel*. |
+| **factCheck production** | Materials are verified — a wrong answer key is treated as blocking. |
+
+Each step's typed output feeds the next. Real providers use `structuredOutput` (Zod-validated); the streamed text *is* the JSON being generated, shown live then condensed to a summary. If a teacher-agent call fails, it falls back to the deterministic mock engine so the loop **always** completes.
+
+## Configuration
+
+Koro needs **no** `DATABASE_URL` or auth to run. Mode is picked by priority: `DEV_SINGLE_PROVIDER` → `DEMO_MODE` (multi-provider) → **mock** (safe default). Full table in [`README.classroomsim.md`](README.classroomsim.md).
+
+| Variable | Default | Role |
 |---|---|---|
-| Entite | `<nom>.entity.ts` | `example.entity.ts` |
-| Use case | `<verbe>-<nom>.usecase.ts` | `create-example.usecase.ts` |
-| Port (interface) | `<nom>.repository.ts` | `example.repository.ts` |
-| Adapter Prisma | `prisma-<nom>.repository.ts` | `prisma-example.repository.ts` |
-| Adapter InMemory | `in-memory-<nom>.repository.ts` | `in-memory-example.repository.ts` |
-| DTO | `<verbe>-<nom>.dto.ts` | `create-example.dto.ts` |
-| Erreurs | `<nom>.errors.ts` | `example.errors.ts` |
-| Value object | `<nom>.enum.ts` | `example-status.enum.ts` |
-| Mapper | `PascalCase.ts` | `ExampleMapper.ts` |
-| Module | `<nom>.module.ts` | `example.module.ts` |
-| Error mapping | `<nom>-error-mappings.ts` | `example-error-mappings.ts` |
-| Query | `<nom>.query.ts` | `example.query.ts` |
-| Test unitaire | `<nom>.test.ts` | `create-example.usecase.test.ts` |
-| Test e2e | `<nom>.spec.ts` | `home.spec.ts` |
+| `MASTRA_DB_URL` | `file:./mastra.db` | Mastra storage (SQLite / LibSQL, serverless) |
+| `DEV_SINGLE_PROVIDER` | _(unset)_ | Force all students on one provider: `anthropic`\|`openai`\|`google`\|`deepseek` |
+| `DEMO_MODE` | `false` | Multi-provider mode (each student on its preferred provider) |
+| `CLASSROOM_CONCURRENCY` | `6` | Parallel student calls |
 
-### Routes API
+## Tech stack
 
-Pattern : `/api/<hexagone>/v1/<resource>` (resource au pluriel, versioning explicite).
+**Frontend / runtime** — Next.js 16 (App Router, Turbopack) · React 19 · TypeScript 5 · Tailwind 4
+**Agents** — [Mastra](https://mastra.ai) (`@mastra/core`, `@mastra/libsql`, `@mastra/memory`) · Zod 4 (end-to-end typing)
+**Fetch.ai bridge** — Python `uagents` + `uagents-core` (Chat Protocol) · Agentverse mailbox · ASI:One discovery
+**Tooling** — pnpm 11 · Node ≥ 24 · Vitest · Playwright · ESLint · Prettier · SonarQube · GitHub Actions CI/CD
 
-Les routes sont fines : validation Zod, appel du use case, retour de la reponse. Toutes wrappees par `apiHandler()`.
+## Engineering rigor — not vibe-coded
 
-### Path aliases TypeScript
+This is built on a production-grade platform starter, not a throwaway prototype:
 
-| Alias | Chemin |
-|---|---|
-| `@/*` | `./src/*` |
-| `@prisma/*` | `./src/infrastructure/db/generated/prisma/*` |
+- ✅ **CI/CD** on every push — lint, type-check, tests, and a **SonarQube quality gate**.
+- ✅ **End-to-end type safety** — the whole agent contract is Zod schemas; the workflow is typed step-to-step.
+- ✅ **Automated tests** — Vitest (unit) + Playwright (e2e).
+- ✅ **Clean separation** — `src/classroom` (pure domain, zero `@mastra` imports) vs `src/mastra` (server runtime).
+- ✅ **Architecture decision records** in [`docs/adr/`](docs/adr/), conventions in [`docs/`](docs/).
+- ✅ **Resilient by design** — bounded concurrency, graceful per-agent failure, deterministic mock fallback.
 
-### Prettier
+## Deeper docs
 
-Double quotes, semicolons, trailing commas, print width 100, tab width 2.
-
-### ESLint
-
-`eslint-config-next/core-web-vitals` + `eslint-config-next/typescript`, integre avec Prettier via `eslint-config-prettier`.
-
-### Gestion des erreurs
-
-Les erreurs metier heritent de `DomainError<T>` avec un code en `UPPER_SNAKE_CASE` prefixe par le domaine :
-
-```typescript
-export class ExampleNotFoundError extends DomainError<{ exampleId: string }> {
-  constructor(ctx: { exampleId: string }) {
-    super("EXAMPLE_NOT_FOUND", "Example not found", ctx, "example", "fetch");
-  }
-}
-```
-
-Chaque hexagone definit son mapping erreur -> HTTP dans `adapters/http/` et l'enregistre au demarrage via `instrumentation.ts`. L'API handler reste agnostique du domaine.
-
-### Authentification
-
-L'auth est abstraite derriere un port (`AuthContextProvider`) avec un adapter Better Auth. Le contexte est propage via `AsyncLocalStorage` :
-
-```typescript
-requireAuth()           // AuthContext ou UnauthorizedError (401)
-requireAdmin()          // verifie isAdmin ou ForbiddenError (403)
-requireOrganization()   // verifie qu'une org est selectionnee
-```
-
-Le middleware `authProxy` protege les routes :
-- **Publiques** : `/api/auth`, `/sign-in`, `/sign-up`
-- **Protegees** : `/dashboard/*`, `/admin/*`, `/api/<hexagone>/v1/*`
-- **Pages auth** : redirige vers `/dashboard` si deja connecte
-
-### Logging
-
-Pino structure avec correlation ID automatique par requete. Pretty print en dev, JSON en prod. Niveaux configurables via `LOG_LEVEL`.
+- 📘 [`README.classroomsim.md`](README.classroomsim.md) — full ClassroomSim guide (modes, classes, exports, decisions).
+- 🤖 [`agent/README.agentverse.md`](agent/README.agentverse.md) — the public Agentverse / ASI:One listing.
+- 🏗️ [`docs/architecture.md`](docs/architecture.md) & [`docs/adr/`](docs/adr/) — architecture & decisions.
 
 ---
 
-## CI/CD
+<div align="center">
 
-### Workflows reutilisables
+**Koro — turn any lesson into a classroom-ready dossier: diagnosed, rewritten, fact-checked, and assessed.**
 
-Le projet utilise des **workflows centralises** heberges dans [`NerionSoft/nerionsoft-cicd`](https://github.com/NerionSoft/nerionsoft-cicd), communs a tous les starters NerionSoft.
+Built for the **Fetch.ai Hackathon (ASE-1)** · Powered by **Mastra** · Discoverable on **Agentverse** & **ASI:One**
 
-#### `ci.yml` — Integration continue
-
-**Declenchement** : push et PR vers `main` et `integration`.
-
-Etapes (toutes configurables via `with:`) :
-
-| Etape | Defaut | Description |
-|---|---|---|
-| `run-lint` | `true` | Linting ESLint |
-| `run-format` | `true` | Verification Prettier |
-| `run-typecheck` | `true` | Verification TypeScript |
-| `run-test` | `true` | Tests unitaires Vitest |
-| `run-build` | `true` | Build Next.js |
-| `run-e2e` | `true` | Tests Playwright |
-| `run-sonar` | `false` | Analyse SonarQube (active ici) |
-
-#### `release.yml` — Release automatisee
-
-**Declenchement** : push vers `main`.
-
-Utilise [Release Please](https://github.com/googleapis/release-please) pour generer automatiquement le `CHANGELOG.md`, creer des PRs de release et publier des GitHub Releases a partir des [conventional commits](https://www.conventionalcommits.org/).
-
-### Dependabot
-
-Verification quotidienne des dependances npm sur la branche `integration`. Les mises a jour mineures et patches sont groupees dans une seule PR.
-
-### SonarQube
-
-Configure via `sonar-project.properties` :
-- Sources : `src/`
-- Tests : `tests/`
-- Couverture : LCOV (`coverage/lcov.info`)
-- Exclusions : `generated/`, `node_modules/`, `.next/`, `build/`
-
-### Strategie de branches
-
-| Branche | Role |
-|---|---|
-| `main` | Production. Les merges declenchent une release. |
-| `integration` | Integration. Recoit les PRs de feature et Dependabot. |
-
----
-
-## Les a priori du starter
-
-Ce template fait partie de la plateforme de starters NerionSoft. Certains choix sont communs a tous les starters et refletent une philosophie d'equipe.
-
-### Architecture hexagonale
-
-Separer le code metier du code technique permet de :
-- **Tester sans infrastructure** : les use cases sont testes avec des adapters InMemory, sans BDD ni serveur
-- **Changer de techno sans toucher au domaine** : remplacer Prisma, Better Auth ou Pino ne modifie que les adapters
-- **Onboarder rapidement** : chaque hexagone est autonome et comprehensible isolement
-
-Le fichier `<nom>.module.ts` sert de **composition root** : il branche les ports vers les adapters concrets. En dev/test on utilise InMemory, en production on utilise Prisma.
-
-Chaque decision architecturale est documentee dans un [ADR](docs/adr/) (Architecture Decision Record).
-
-### CI/CD reutilisable et centralisee
-
-Tous les starters partagent les memes workflows via `NerionSoft/nerionsoft-cicd` :
-- Niveau de qualite **uniforme** entre tous les projets (lint, format, typecheck, tests, build, e2e, SonarQube)
-- Mise a jour de la CI **une seule fois** pour tous les projets
-- Fichiers de workflow **simples et declaratifs** dans chaque repo
-
-### Qualite du code integree des le jour 1
-
-Le starter impose d'emblee :
-- **ESLint 9** (flat config) avec les regles Next.js + TypeScript
-- **Prettier** pour un formatage uniforme
-- **TypeScript strict** pour eliminer les bugs a la compilation
-- **SonarQube** pour la couverture et la detection de code smells
-- **Vitest** pour les tests unitaires rapides avec couverture V8
-- **Playwright** pour les tests e2e sur Chromium
-
-Aucun hook git local (`husky`, `lint-staged`) : la qualite est enforced par la CI, pas par la machine du developpeur.
-
-### Better Auth + organisations
-
-Better Auth est choisi pour :
-- Integration native avec Next.js et Prisma
-- Support des **organisations**, **membres** et **roles** out-of-the-box
-- Modele extensible via plugins (OAuth, 2FA, email providers)
-
-L'auth est encapsulee derriere un port (`AuthContextProvider`) et un `AsyncLocalStorage` dedie, donc remplacable sans toucher au domaine.
-
-### Prisma + Neon
-
-- **Prisma 7** pour le schema-first avec TypeScript natif
-- **Neon adapter** pour une connexion serverless-friendly a PostgreSQL
-- Le client genere est place dans `src/infrastructure/db/generated/prisma/` et gitignore (regenere a chaque `pnpm install`)
-
-### Convention d'API versionnee
-
-Les routes suivent `/api/<hexagone>/v1/<resource>`. Le wrapper `apiHandler()` fournit :
-- **Correlation ID** (header `x-correlation-id`) pour le tracing distribue
-- **Logging structure** (methode, path, status, duree)
-- **Resolution du contexte auth** via `AsyncLocalStorage`
-- **Gestion d'erreurs standardisee** : DomainError -> HTTP status, ZodError -> 400, erreurs inconnues -> 500
-
-### Middleware proxy
-
-Le middleware (`proxy.ts`) est organise en **proxies chainables** :
-- `authProxy` : protection des routes, redirections sign-in/sign-out
-- Architecture extensible pour ajouter `securityHeadersProxy`, `localeProxy`, etc.
-
-### Validation Zod
-
-Chaque DTO d'entree est defini avec un schema Zod. La validation echoue automatiquement avec une reponse 400 structuree grace au `apiHandler`.
-
-### Tests pyramidaux
-
-Le dossier `tests/` encourage la **pyramide de tests** :
-- `unit/` : rapides, isoles, testent les use cases avec des adapters InMemory
-- `integration/` : testent les interactions entre couches
-- `e2e/` : testent le flux complet via Playwright
-
-### Configuration d'environnement lazy
-
-L'objet `env` utilise un `Proxy` pour valider les variables au premier acces, pas a l'import. Si une variable requise manque, l'application crash immediatement avec un message clair.
-
-### Script de setup interactif
-
-Le script `node scripts/setup.mjs` automatise le renommage mecanique de l'hexagone d'exemple vers votre domaine. Il se supprime ensuite lui-meme.
-
----
-
-## Documentation
-
-| Document | Description |
-|---|---|
-| [`docs/architecture.md`](docs/architecture.md) | Vue d'ensemble de l'architecture, diagrammes et flux |
-| [`docs/conventions.md`](docs/conventions.md) | Conventions de nommage, imports et patterns |
-| [`docs/adr/`](docs/adr/) | Architecture Decision Records (7 ADRs) |
-| [`.env.example`](.env.example) | Template des variables d'environnement |
-
----
-
-## Licence
-
-Proprietary - NerionSoft
+</div>

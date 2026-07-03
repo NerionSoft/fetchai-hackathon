@@ -1,10 +1,10 @@
 /**
- * POST /api/agent — runs a full ClassroomSim boucle once and returns the whole
+ * POST /api/agent — runs a full ClassroomSim loop once and returns the whole
  * result as a single JSON response (NON-streaming, unlike /api/classroom/run).
  *
  * This is the JSON entrypoint consumed by the Fetch.ai uAgent bridge (the
  * Agentverse / ASI:One agent that fronts ClassroomSim): it POSTs the lesson
- * markdown, waits for the full boucle to finish, and gets back the rebuilt
+ * markdown, waits for the full loop to finish, and gets back the rebuilt
  * dossier markdown plus the raw LoopResult — no SSE frames to parse.
  */
 import { randomUUID } from "node:crypto";
@@ -21,12 +21,12 @@ export const maxDuration = 300;
 const BodySchema = z.object({
   id: z.string().optional(),
   title: z.string().optional(),
-  markdown: z.string().min(1, "La leçon est vide."),
+  markdown: z.string().min(1, "The lesson is empty."),
 });
 
 function titleFromMarkdown(md: string): string {
   const m = md.match(/^#\s+(.+)$/m);
-  return m ? m[1].trim() : "Leçon sans titre";
+  return m ? m[1].trim() : "Untitled lesson";
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -34,7 +34,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     body = BodySchema.parse(await req.json());
   } catch (err) {
-    const message = err instanceof z.ZodError ? err.issues.map((i) => i.message).join("; ") : "Corps invalide";
+    const message = err instanceof z.ZodError ? err.issues.map((i) => i.message).join("; ") : "Invalid body";
     return Response.json({ error: message }, { status: 400 });
   }
 
@@ -46,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     const result = await runLoop(lesson, () => {});
-    const dossier = buildMarkdown(result, { includeCorriges: true });
+    const dossier = buildMarkdown(result, { includeAnswerKeys: true });
     return Response.json({ title: lesson.title, dossier_markdown: dossier, result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

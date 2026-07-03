@@ -11,21 +11,21 @@
 import { z } from "zod";
 
 /* -------------------------------------------------------------------------- */
-/*  Axes : niveau de maîtrise (axe 1) × style cognitif (axe 2) × fournisseur   */
+/*  Axes: mastery level (axis 1) × cognitive style (axis 2) × provider         */
 /* -------------------------------------------------------------------------- */
 
-export const NIVEAUX = ["N0", "N1", "N2", "N3", "N4", "N5", "N6"] as const;
-export const NiveauSchema = z.enum(NIVEAUX);
-export type Niveau = z.infer<typeof NiveauSchema>;
+export const LEVELS = ["N0", "N1", "N2", "N3", "N4", "N5", "N6"] as const;
+export const LevelSchema = z.enum(LEVELS);
+export type Level = z.infer<typeof LevelSchema>;
 
-/** Style codes are ASCII-safe (accents live in the human-facing catalog). */
+/** Style codes are ASCII-safe (labels live in the human-facing catalog). */
 export const STYLES = [
-  "S-LITTERAL",
-  "S-ANALOGIQUE",
-  "S-SEQUENTIEL",
+  "S-LITERAL",
+  "S-ANALOGICAL",
+  "S-SEQUENTIAL",
   "S-IMPATIENT",
-  "S-ANXIEUX",
-  "S-CONTEXTE-MANQUANT",
+  "S-ANXIOUS",
+  "S-MISSING-CONTEXT",
 ] as const;
 export const StyleSchema = z.enum(STYLES);
 export type Style = z.infer<typeof StyleSchema>;
@@ -50,85 +50,85 @@ export const LessonSchema = z.object({
 export type Lesson = z.infer<typeof LessonSchema>;
 
 export const LessonVersionSchema = z.object({
-  title: z.string().describe("Titre de la leçon réécrite."),
-  markdown: z.string().describe("La nouvelle version enrichie, en markdown complet."),
-  resume_des_changements: z
+  title: z.string().describe("Title of the rewritten lesson."),
+  markdown: z.string().describe("The new enriched version, as complete markdown."),
+  change_summary: z
     .array(z.string())
-    .describe("Liste des modifications apportées, dans l'ordre des priorités traitées."),
-  prerequis_explicites: z
+    .describe("List of changes made, in the order of the priorities addressed."),
+  explicit_prerequisites: z
     .array(z.string())
-    .describe("Prérequis désormais rendus explicites en tête de leçon."),
+    .describe("Prerequisites now made explicit at the top of the lesson."),
 });
 export type LessonVersion = z.infer<typeof LessonVersionSchema>;
 
 /* -------------------------------------------------------------------------- */
-/*  StudentRestitution — sortie de chaque élève-agent                          */
+/*  StudentRestitution — output of each student-agent                          */
 /* -------------------------------------------------------------------------- */
 
-export const ErreurReveleeSchema = z.object({
-  concept_rate: z.string().describe("Le concept précis de la leçon qui n'est pas passé."),
-  cause_probable: z
+export const RevealedErrorSchema = z.object({
+  missed_concept: z.string().describe("The precise concept of the lesson that did not land."),
+  probable_cause: z
     .string()
-    .describe("Cause diagnostiquée : prérequis manquant, analogie trompeuse, ordre, jargon…"),
-  declenche_par: z
+    .describe("Diagnosed cause: missing prerequisite, misleading analogy, ordering, jargon…"),
+  triggered_by: z
     .string()
-    .describe("Quel mécanisme du profil (niveau × style) a déclenché l'erreur."),
+    .describe("Which mechanism of the profile (level × style) triggered the error."),
 });
-export type ErreurRevelee = z.infer<typeof ErreurReveleeSchema>;
+export type RevealedError = z.infer<typeof RevealedErrorSchema>;
 
 export const StudentRestitutionSchema = z.object({
   studentId: z.string(),
   classId: ClassIdSchema,
-  niveau: NiveauSchema,
+  level: LevelSchema,
   style: StyleSchema,
   provider: ProviderSchema,
-  ce_que_jai_compris: z
+  what_i_understood: z
     .string()
-    .describe("Reformulation sincère de la leçon, selon le profil cognitif de l'élève."),
-  points_surs: z.array(z.string()).describe("Certitudes de l'élève (peuvent être fausses)."),
-  points_de_doute: z.array(z.string()),
-  questions_au_prof: z
+    .describe("Sincere re-explanation of the lesson, according to the student's cognitive profile."),
+  confident_points: z.array(z.string()).describe("The student's certainties (may be wrong)."),
+  uncertain_points: z.array(z.string()),
+  questions_for_teacher: z
     .array(z.string())
     .max(2)
-    .describe("0 à 2 questions, cohérentes avec le profil."),
-  erreurs_revelees: z
-    .array(ErreurReveleeSchema)
-    .describe("CHAMP MÉTA — alimente directement le diagnostic."),
+    .describe("0 to 2 questions, consistent with the profile."),
+  revealed_errors: z
+    .array(RevealedErrorSchema)
+    .describe("META FIELD — feeds the diagnosis directly."),
 });
 export type StudentRestitution = z.infer<typeof StudentRestitutionSchema>;
 
 /* -------------------------------------------------------------------------- */
-/*  TeacherDiagnosis — sortie du prof-diagnosticien                            */
+/*  TeacherDiagnosis — output of the diagnostician teacher-agent               */
 /* -------------------------------------------------------------------------- */
 
-export const ConceptMalComprisSchema = z.object({
+export const MisunderstoodConceptSchema = z.object({
   concept: z.string(),
-  niveaux_concernes: z.array(NiveauSchema),
-  frequence: z.number().int().min(0).describe("Nombre d'élèves ayant raté ce concept."),
-  gravite: z.enum(["faible", "moyenne", "elevee"]),
+  affected_levels: z.array(LevelSchema),
+  frequency: z.number().int().min(0).describe("Number of students who missed this concept."),
+  severity: z.enum(["low", "medium", "high"]),
 });
 
-export const PrerequisManquantSchema = z.object({
-  prerequis: z.string(),
-  preuve: z.string().describe("Citation/observation tirée surtout de N2 & S-CONTEXTE-MANQUANT."),
+export const MissingPrerequisiteSchema = z.object({
+  prerequisite: z.string(),
+  evidence: z.string().describe("Quote/observation drawn mostly from N2 & S-MISSING-CONTEXT."),
 });
 
-export const PassageAmbiguSchema = z.object({
-  extrait: z.string().describe("Extrait du texte original posant problème."),
-  probleme: z.string().describe("Tiré surtout de N6 & S-ANXIEUX."),
+export const AmbiguousPassageSchema = z.object({
+  excerpt: z.string().describe("Excerpt of the original text that is problematic."),
+  problem: z.string().describe("Drawn mostly from N6 & S-ANXIOUS."),
 });
 
 export const TeacherDiagnosisSchema = z.object({
-  concepts_mal_compris: z.array(ConceptMalComprisSchema),
-  prerequis_manquants: z.array(PrerequisManquantSchema),
-  passages_ambigus: z.array(PassageAmbiguSchema),
-  ce_qui_fonctionne: z
+  misunderstood_concepts: z.array(MisunderstoodConceptSchema),
+  missing_prerequisites: z.array(MissingPrerequisiteSchema),
+  ambiguous_passages: z.array(AmbiguousPassageSchema),
+  what_works: z
     .array(z.string())
-    .describe("Validé par N5 — le rédacteur NE DOIT PAS y toucher."),
-  defauts_structurels: z.array(z.string()).describe("Tirés de N6."),
-  priorites_de_reecriture: z
+    .describe("Validated by N5 — the writer MUST NOT touch these."),
+  structural_flaws: z.array(z.string()).describe("Drawn from N6."),
+  rewrite_priorities: z
     .array(z.string())
-    .describe("Liste ordonnée et actionnable, traitée dans l'ordre par le rédacteur."),
+    .describe("Ordered, actionable list, addressed in order by the writer."),
 });
 export type TeacherDiagnosis = z.infer<typeof TeacherDiagnosisSchema>;
 
@@ -137,89 +137,89 @@ export type TeacherDiagnosis = z.infer<typeof TeacherDiagnosisSchema>;
 /* -------------------------------------------------------------------------- */
 
 export const FactCheckClaimSchema = z.object({
-  affirmation: z.string().describe("L'affirmation vérifiée, citée."),
-  verdict: z.enum(["correct", "douteux", "incorrect"]),
-  explication: z.string(),
-  correction_suggeree: z.string().optional(),
-  source_emplacement: z
+  claim: z.string().describe("The verified claim, quoted."),
+  verdict: z.enum(["correct", "dubious", "incorrect"]),
+  explanation: z.string(),
+  suggested_correction: z.string().optional(),
+  source_location: z
     .string()
-    .describe("Où dans le livrable (leçon / item d'éval / corrigé d'exercice)."),
+    .describe("Where in the deliverable (lesson / assessment item / exercise answer key)."),
 });
 export type FactCheckClaim = z.infer<typeof FactCheckClaimSchema>;
 
 export const FactCheckReportSchema = z.object({
-  cible: z
-    .enum(["lesson", "evaluations", "exercices", "fiche"])
-    .describe("Quel livrable a été vérifié."),
+  target: z
+    .enum(["lesson", "evaluations", "exercises", "sheet"])
+    .describe("Which deliverable was verified."),
   claims: z.array(FactCheckClaimSchema),
-  bloquant: z
+  blocking: z
     .boolean()
-    .describe("true si au moins une affirmation 'incorrect' subsiste (corrigé faux = bloquant)."),
-  synthese: z.string(),
+    .describe("true if at least one 'incorrect' claim remains (a wrong answer key = blocking)."),
+  summary: z.string(),
 });
 export type FactCheckReport = z.infer<typeof FactCheckReportSchema>;
 
 /* -------------------------------------------------------------------------- */
-/*  Production pédagogique : Evaluation / Exercice / FicheRevision             */
+/*  Pedagogical production: Evaluation / Exercise / RevisionSheet              */
 /* -------------------------------------------------------------------------- */
 
 export const EvaluationItemSchema = z.object({
-  type: z.enum(["qcm", "ouverte", "vrai_faux"]),
-  enonce: z.string(),
-  options: z.array(z.string()).optional().describe("Présent pour les QCM."),
-  corrige: z.string(),
-  concept_cible: z.string().describe("Le concept (issu du diagnostic) que l'item travaille."),
+  type: z.enum(["mcq", "open", "true_false"]),
+  statement: z.string(),
+  options: z.array(z.string()).optional().describe("Present for MCQ."),
+  answer_key: z.string(),
+  target_concept: z.string().describe("The concept (from the diagnosis) that the item works on."),
 });
 
 export const EvaluationSchema = z.object({
-  niveau: z.enum(["debutant", "intermediaire", "avance"]),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
   items: z.array(EvaluationItemSchema),
 });
 export type Evaluation = z.infer<typeof EvaluationSchema>;
 
 export const EvaluationSetSchema = z.object({
-  debutant: EvaluationSchema,
-  intermediaire: EvaluationSchema,
-  avance: EvaluationSchema,
+  beginner: EvaluationSchema,
+  intermediate: EvaluationSchema,
+  advanced: EvaluationSchema,
 });
 export type EvaluationSet = z.infer<typeof EvaluationSetSchema>;
 
-export const ExerciceSchema = z.object({
-  titre: z.string(),
+export const ExerciseSchema = z.object({
+  title: z.string(),
   format: z
-    .enum(["mise_en_situation", "mini_defi", "reperage_erreur", "application_progressive"])
-    .describe("reperage_erreur cible idéalement les contresens N2."),
-  enonce: z.string(),
-  corrige: z.string().describe("Corrigé / commentaire pédagogique."),
-  concept_cible: z.string(),
-  niveau_indicatif: z.enum(["debutant", "intermediaire", "avance"]),
+    .enum(["scenario", "mini_challenge", "error_spotting", "progressive_application"])
+    .describe("error_spotting ideally targets the N2 misconceptions."),
+  statement: z.string(),
+  answer_key: z.string().describe("Answer key / pedagogical commentary."),
+  target_concept: z.string(),
+  indicative_level: z.enum(["beginner", "intermediate", "advanced"]),
 });
-export type Exercice = z.infer<typeof ExerciceSchema>;
+export type Exercise = z.infer<typeof ExerciseSchema>;
 
-export const ExerciceSetSchema = z.object({
-  exercices: z.array(ExerciceSchema),
+export const ExerciseSetSchema = z.object({
+  exercises: z.array(ExerciseSchema),
 });
-export type ExerciceSet = z.infer<typeof ExerciceSetSchema>;
+export type ExerciseSet = z.infer<typeof ExerciseSetSchema>;
 
-export const FicheRevisionSchema = z.object({
-  titre: z.string(),
-  prerequis: z.array(z.string()).describe("Mis en tête — désormais explicités."),
-  points_cles: z.array(z.string()),
-  definitions: z.array(z.object({ terme: z.string(), def: z.string() })),
-  pieges_frequents: z
+export const RevisionSheetSchema = z.object({
+  title: z.string(),
+  prerequisites: z.array(z.string()).describe("Placed at the top — now made explicit."),
+  key_points: z.array(z.string()),
+  definitions: z.array(z.object({ term: z.string(), def: z.string() })),
+  common_pitfalls: z
     .array(z.string())
-    .describe("Tirés des erreurs_revelees et des concepts les plus ratés."),
+    .describe("Drawn from the revealed_errors and the most-missed concepts."),
 });
-export type FicheRevision = z.infer<typeof FicheRevisionSchema>;
+export type RevisionSheet = z.infer<typeof RevisionSheetSchema>;
 
 /* -------------------------------------------------------------------------- */
-/*  Agrégat final d'une boucle                                                 */
+/*  Final aggregate of a loop                                                   */
 /* -------------------------------------------------------------------------- */
 
 export const PedagogicalProductionSchema = z.object({
   evaluations: EvaluationSetSchema,
-  exercices: ExerciceSetSchema,
-  fiche: FicheRevisionSchema,
+  exercises: ExerciseSetSchema,
+  sheet: RevisionSheetSchema,
 });
 export type PedagogicalProduction = z.infer<typeof PedagogicalProductionSchema>;
 
