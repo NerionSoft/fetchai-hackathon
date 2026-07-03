@@ -1,0 +1,42 @@
+<svg width="720" height="200" viewBox="0 0 720 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Koro — ClassroomSim">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="720" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#12203A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3D8BD3"/>
+      <stop offset="1" stop-color="#22D3A8"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="720" height="200" rx="24" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="717" height="197" rx="22.5" fill="none" stroke="#1E2A44" stroke-width="3"/>
+
+  <!-- classroom "nodes": student-agents around a teacher-agent -->
+  <g transform="translate(100,100)" filter="url(#glow)">
+    <line x1="0" y1="0" x2="-52" y2="-40" stroke="#2C3E63" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="58" y2="-30" stroke="#2C3E63" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="-58" y2="34" stroke="#2C3E63" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="50" y2="46" stroke="#2C3E63" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="0" y2="-62" stroke="#2C3E63" stroke-width="2.5"/>
+    <circle cx="-52" cy="-40" r="11" fill="#3D8BD3"/>
+    <circle cx="58" cy="-30" r="11" fill="#22D3A8"/>
+    <circle cx="-58" cy="34" r="11" fill="#F5A524"/>
+    <circle cx="50" cy="46" r="11" fill="#E5484D"/>
+    <circle cx="0" cy="-62" r="11" fill="#8B5CF6"/>
+    <!-- teacher-agent core -->
+    <circle cx="0" cy="0" r="26" fill="url(#accent)"/>
+    <path d="M-13 -3 L0 -11 L13 -3 L0 5 Z" fill="#0B1220"/>
+    <path d="M13 -3 L13 6 M0 5 L0 12" stroke="#0B1220" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="196" y="96" font-family="'Segoe UI',Helvetica,Arial,sans-serif" font-size="58" font-weight="800" fill="#F5F7FB" letter-spacing="-1">Koro</text>
+  <text x="197" y="134" font-family="'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="600" fill="#22D3A8" letter-spacing="0.5">ClassroomSim</text>
+  <text x="198" y="164" font-family="'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" font-weight="500" fill="#8FA3C4" letter-spacing="0.3">Agentic lesson diagnosis &amp; pedagogical content generation</text>
+</svg>

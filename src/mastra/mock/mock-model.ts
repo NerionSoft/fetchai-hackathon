@@ -70,7 +70,10 @@ function tokenize(text: string): string[] {
   return text.match(/\s+|[^\s]+/g) ?? [text];
 }
 
-const TOKEN_DELAY_MS = Number(process.env.MOCK_TOKEN_DELAY_MS ?? "5");
+// Default 0 = instant mock streaming (keeps a full run to a few seconds, which
+// matters for the synchronous /api/agent path used by the ASI:One uAgent).
+// Set MOCK_TOKEN_DELAY_MS > 0 only for a slower, more "typewriter" UI stream.
+const TOKEN_DELAY_MS = Number(process.env.MOCK_TOKEN_DELAY_MS ?? "0");
 
 export function createMockModel(modelId = "classroomsim/mock"): MockLanguageModel {
   return {
