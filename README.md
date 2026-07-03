@@ -1,3 +1,9 @@
+> 🎓 **Ce dépôt héberge ClassroomSim** — une boucle d'amélioration pédagogique agentique (Mastra).
+> **→ Voir [`README.classroomsim.md`](./README.classroomsim.md)** pour le démarrage (`pnpm install && pnpm dev`, zéro clé API requise).
+> Le contenu ci-dessous documente le starter NerionSoft d'origine.
+
+---
+
 # Platform Starter Next.js
 
 | CI/CD | Stack | Qualite | Tooling |

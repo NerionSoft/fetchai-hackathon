@@ -1,9 +1,10 @@
-import type { NextRequest } from "next/server";
-import { authProxy } from "@/infrastructure/http/proxy/auth-proxy";
-
-export async function proxy(req: NextRequest) {
-  const authResponse = await authProxy(req);
-  if (authResponse) return authResponse;
+/**
+ * ClassroomSim runs without authentication, so the request proxy is a no-op.
+ * (The starter's auth gating — which redirected "/" to /sign-in and required a
+ * database + better-auth secret — is intentionally disabled here.)
+ */
+export async function proxy(): Promise<void> {
+  return;
 }
 
 export const config = {

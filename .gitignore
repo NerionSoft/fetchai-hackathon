@@ -48,3 +48,7 @@ yarn-error.log*
 next-env.d.ts
 
 src/infrastructure/db/generated/prisma
+
+# ClassroomSim — Mastra LibSQL storage
+mastra*.db
+mastra*.db-*
