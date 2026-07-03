@@ -26,7 +26,8 @@ from uagents_core.contrib.protocols.chat import (
 )
 
 # Public URL of the deployed ClassroomSim Next.js backend (set in Secrets/.env).
-MASTRA_APP_URL = os.getenv("MASTRA_APP_URL", "http://localhost:3000")
+# rstrip("/") so a trailing slash doesn't produce a `//api/agent` 308 redirect.
+MASTRA_APP_URL = os.getenv("MASTRA_APP_URL", "http://localhost:3000").rstrip("/")
 
 chat = Protocol(spec=chat_protocol_spec)
 
@@ -46,7 +47,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
     text = "".join(item.text for item in msg.content if isinstance(item, TextContent))
 
     try:
-        async with httpx.AsyncClient(timeout=300) as client:
+        async with httpx.AsyncClient(timeout=300, follow_redirects=True) as client:
             r = await client.post(f"{MASTRA_APP_URL}/api/agent", json={"markdown": text})
             r.raise_for_status()
             data = r.json()

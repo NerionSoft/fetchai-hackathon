@@ -40,7 +40,7 @@ if not AGENT_SEED:
     )
 
 AGENT_PORT = int(os.getenv("AGENT_PORT", "8001"))
-MASTRA_APP_URL = os.getenv("MASTRA_APP_URL", "http://localhost:3000")
+MASTRA_APP_URL = os.getenv("MASTRA_APP_URL", "http://localhost:3000").rstrip("/")
 AGENT_NAME = os.getenv("AGENT_NAME", "koro-classroomsim")
 
 # --- Agent + Chat protocol setup --------------------------------------------
