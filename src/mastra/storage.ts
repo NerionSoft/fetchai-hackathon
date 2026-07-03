@@ -1,32 +1,16 @@
 /**
- * Shared Mastra storage + memory factory.
+ * Mastra storage — in-process LibSQL (`:memory:`).
  *
- * Postgres (Neon) via @mastra/pg. The connection string comes exclusively from
- * the environment so the built bundle stays host-agnostic and serverless-safe
- * (no host-local file path — works on Vercel / Mastra Cloud out of the box):
- *   - MASTRA_DB_URL = a Postgres connection string. On Neon, use the *pooled*
- *     endpoint (…-pooler.…neon.tech/…?sslmode=require) so serverless functions
- *     don't exhaust connections.
- * Mastra creates its own `mastra_*` prefixed tables, so it coexists with the
- * Prisma/better-auth tables in the same database. Server-only.
+ * The ClassroomSim loop runs synchronously within a single request and never
+ * needs cross-invocation persistence, so we use an ephemeral in-memory store:
+ *   - zero network / DB latency (pure RAM, in-process),
+ *   - serverless-safe (a fresh store per invocation is exactly what we want),
+ *   - no external database dependency for the loop.
+ *
+ * This keeps a full run to a few seconds even on serverless with the platform's
+ * short function timeout. (Auth/Prisma persistence is entirely separate and
+ * still uses Neon via DATABASE_URL.)
  */
-import { PostgresStore } from "@mastra/pg";
-import { Memory } from "@mastra/memory";
+import { LibSQLStore } from "@mastra/libsql";
 
-const connectionString = process.env.MASTRA_DB_URL;
-if (!connectionString) {
-  throw new Error(
-    "MASTRA_DB_URL is not set — copy .env.example to .env for local dev, " +
-      "or configure a Postgres (Neon) connection string in your deploy env.",
-  );
-}
-
-export const storage = new PostgresStore({ id: "classroomsim", connectionString });
-
-/** Short conversation memory bound to the shared store (one per agent). */
-export function makeMemory(): Memory {
-  return new Memory({
-    storage,
-    options: { lastMessages: 10, semanticRecall: false },
-  });
-}
+export const storage = new LibSQLStore({ id: "classroomsim", url: ":memory:" });
