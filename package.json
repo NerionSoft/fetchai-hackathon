@@ -26,8 +26,8 @@
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.6.9",
     "@mastra/core": "^1.49.0",
-    "@mastra/libsql": "^1.15.0",
     "@mastra/memory": "^1.22.1",
+    "@mastra/pg": "^1.15.0",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "better-auth": "^1.6.9",
