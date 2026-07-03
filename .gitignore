@@ -52,3 +52,6 @@ src/infrastructure/db/generated/prisma
 # ClassroomSim — Mastra LibSQL storage
 mastra*.db
 mastra*.db-*
+
+# Mastra build output
+/.mastra
