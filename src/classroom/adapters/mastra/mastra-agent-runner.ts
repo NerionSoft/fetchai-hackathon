@@ -23,6 +23,14 @@ import { agentMeta, mastraAgents, runtimeConfig } from "./agents";
 import { isMockProvider } from "./model-router";
 import { encodeBrief } from "../mock/brief-codec";
 
+/**
+ * Per-call output-token cap for REAL providers — bounds cost and guards against a
+ * runaway generation. Tune via env; the default is generous enough for the
+ * largest structured output (the diagnosis / evaluation sets) without truncating.
+ * Mock agents are deterministic and free, so the cap is not applied to them.
+ */
+const MAX_OUTPUT_TOKENS = Number(process.env.CLASSROOM_MAX_OUTPUT_TOKENS ?? "8000");
+
 interface StreamChunk {
   type?: string;
   payload?: { text?: string };
@@ -69,7 +77,10 @@ export class MastraAgentRunner implements AgentRunner {
 
     const result = (await (mock
       ? agent.stream(userText)
-      : agent.stream(userText, { structuredOutput: { schema } }))) as unknown as ModelOutput;
+      : agent.stream(userText, {
+          structuredOutput: { schema },
+          modelSettings: { maxOutputTokens: MAX_OUTPUT_TOKENS },
+        }))) as unknown as ModelOutput;
 
     const reader = result.fullStream.getReader();
     try {
