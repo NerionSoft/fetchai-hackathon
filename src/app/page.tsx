@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import { ResultPanels } from "./_classroom/ResultPanels";
-import { Scene } from "./_classroom/Scene";
-import { useClassroomRun } from "./_classroom/use-classroom-run";
+import { ResultPanels } from "@/presentation/features/classroom/ResultPanels";
+import { Scene } from "@/presentation/features/classroom/Scene";
+import { useClassroomRun } from "@/presentation/features/classroom/use-classroom-run";
 
 export default function Home() {
   const { state, start, stop } = useClassroomRun();

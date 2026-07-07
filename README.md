@@ -81,7 +81,7 @@ flowchart LR
     Bridge -->|POST /api/agent| App[ClassroomSim<br/>Next.js 16 · App Router]
     App --> WF
 
-    subgraph WF["Mastra workflow — typed &amp; Zod-validated"]
+    subgraph WF["Application use case — typed &amp; Zod-validated"]
       direction LR
       SIM[simulate<br/>18 student-agents ∥] --> DIA[diagnose]
       DIA --> REW[rewrite] --> FC1[factCheck lesson]
@@ -166,7 +166,7 @@ This is built on a production-grade platform starter, not a throwaway prototype:
 - ✅ **CI/CD** on every push — lint, type-check, tests, and a **SonarQube quality gate**.
 - ✅ **End-to-end type safety** — the whole agent contract is Zod schemas; the workflow is typed step-to-step.
 - ✅ **Automated tests** — Vitest (unit) + Playwright (e2e).
-- ✅ **Clean separation** — `src/classroom` (pure domain, zero `@mastra` imports) vs `src/mastra` (server runtime).
+- ✅ **Hexagonal (ports & adapters)** — `src/classroom/`: pure `domain` → `application` (use case + ports) → `adapters` (Mastra runner, mock engine, SSE, export), wired by a composition root. The domain has zero framework imports.
 - ✅ **Architecture decision records** in [`docs/adr/`](docs/adr/), conventions in [`docs/`](docs/).
 - ✅ **Resilient by design** — bounded concurrency, graceful per-agent failure, deterministic mock fallback.
 
