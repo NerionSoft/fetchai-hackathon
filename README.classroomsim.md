@@ -4,7 +4,7 @@ An autonomous **pedagogical improvement loop**, built with **Mastra** (TypeScrip
 
 A teacher submits a lesson. Multi-model **classes of student-agents** re-explain it, a **diagnostician teacher-agent** aggregates the signal, a **writer teacher-agent** rewrites the lesson, a **fact-checker** validates it, and then agents produce **assessments, exercises, and revision sheets** — all **driven by the diagnosis** and visible **live** (token-by-token streaming) in an **SVG** scene.
 
-> This is not an API-call wrapper: these are real Mastra agents (roles, system prompts, memory) orchestrated by a Zod-typed Mastra workflow.
+> This is not an API-call wrapper: these are real Mastra agents (roles, system prompts, memory) orchestrated by a Zod-typed application use case (hexagonal ports & adapters).
 
 ---
 
@@ -71,44 +71,60 @@ OPENAI_API_KEY=sk-...
 | **B — Realistic** | Simulate a real, heterogeneous classroom | mostly N2–N4 |
 | **C — Quality audit** | N5 validates what works, N6 critiques the material | N4–N6 |
 
-Subtle profiles (N5, N6, S-ANXIOUS) get the best models; coarse profiles tolerate weaker models. (See `src/classroom/roster.ts` and `src/classroom/profiles.ts`.)
+Subtle profiles (N5, N6, S-ANXIOUS) get the best models; coarse profiles tolerate weaker models. (See `domain/profiles/roster.ts` and `domain/profiles/cognitive-profiles.ts`.)
 
 ---
 
 ## Architecture
 
+ClassroomSim is a self-contained **hexagone** (bounded context) following the
+starter's ports & adapters convention (ADR-001/004).
+
 ```
-src/classroom/        Pure domain (client + server, NO @mastra imports)
-  schemas.ts          Zod data contract (StudentRestitution, TeacherDiagnosis, …)
-  profiles.ts         N0-N6 level catalogs + S-* style catalogs (→ system prompts)
-  roster.ts           Composition of the 3 classes
-  colors.ts           Deterministic color per studentId
-  events.ts           SSE protocol (discriminated union)
-  export.ts           Markdown / printable HTML export
+src/classroom/
+  domain/                     Pure business rules (client + server safe, framework-free)
+    value-objects/axes.ts     Level / Style / Provider / ClassId enums
+    entities/                 Zod contract: lesson, student-restitution, teacher-diagnosis,
+                              fact-check, production, loop-result
+    profiles/                 N0-N6 level catalogs, S-* style catalogs, the 3-class roster
+    prompts/                  agent-brief (structured task) + briefs (prompt builders)
+    agent-color.ts            Deterministic hue per agent id
+    pricing.ts                Per-provider cost table + estimate
+    errors/                   Domain errors (NoRestitutionError)
+    index.ts                  Domain barrel
 
-src/mastra/           Agentic runtime (server only)
-  config.ts           Flags, key detection, model tiers, cost table
-  model-router.ts     provider/model string OR mock model
-  agents.ts           18 students + 6 teachers (instructions + model + memory)
-  workflow.ts         Mastra workflow: 6 Zod-typed steps, .commit()
-  storage.ts          LibSQLStore (SQLite) + memory
-  index.ts            Mastra instance (agents + workflow + storage)
-  mock/               Mock LanguageModelV2 model + deterministic "mock brain"
-  run/                emitter (SSE side-channel), agent-call, calls, briefs, loop
+  application/                Orchestration (depends only on domain)
+    usecases/run-classroom-loop.usecase.ts   The 6-phase loop + resilience policy
+    ports/                    AgentRunner · AgentFallback · RunEventSink
+    events/classroom-event.ts SSE protocol (discriminated union)
+    dto/run-loop-input.ts     markdown → Lesson validation
+    support/                  mapPool (concurrency), UsageMeter (cost accounting)
 
+  adapters/                   Concrete implementations of the ports
+    mastra/                   AgentRunner via Mastra: agents, model-router, runtime-config,
+                              mastra instance, storage (in-memory LibSQL)
+    mock/                     Deterministic engine: mock LanguageModel, mock brain,
+                              brief codec, MockAgentFallback
+    sse/                      RunEventSink over Server-Sent Events
+    export/                   markdown-dossier + pdf-dossier (jsPDF)
+    http/error-mappings.ts    Error code → HTTP status
+
+  classroom.module.ts         Composition root (wires adapters → use case)
+
+src/presentation/features/classroom/   SSE hook + SVG scene + result panels + exports
 src/app/
   page.tsx            Submission + live scene + result panels
-  _classroom/         SSE hook + SVG scene + panels + exports
-  api/classroom/run   Route Handler POST → SSE (Web Streams)
+  api/classroom/run   Route Handler POST → SSE (Web Streams), delegates to the use case
   api/classroom/demo  Route GET → demo lesson
+  api/agent           Route POST → full dossier JSON (Fetch.ai uAgent bridge)
 
 content/lessons/interets-composes.md   Demo lesson (deliberate flaws)
 ```
 
-**Workflow flow** (each typed output feeds the next step):
+**Loop flow** (the use case runs each phase; each typed output feeds the next):
 `simulate` (students in parallel) → `diagnose` → `rewrite` → `factCheckLesson` → `produce` (assessment + exercises + sheet in parallel) → `factCheckProduction` → `LoopResult`.
 
-**Streaming**: each `agent.stream()` has its `text-delta`s re-emitted as SSE events via a side channel indexed by `runId` (the visuals never constrain the orchestration). The frontend (fetch-streaming) drives the state of the SVG circles.
+**Streaming**: each `agent.stream()` has its `text-delta`s forwarded (via the runner's `onToken` callback) to the injected `RunEventSink`, which the SSE route serializes as events (the visuals never constrain the orchestration). The frontend (fetch-streaming) drives the state of the SVG circles.
 
 ---
 
@@ -136,7 +152,7 @@ From the **Exports** panel, a **"Include answer keys"** checkbox (so answer keys
 
 **Other formats**: **Markdown** and **printable HTML** (`@media print`).
 
-Implementation: `src/classroom/pdf.ts` (jsPDF) and `src/classroom/export.ts` (Markdown/HTML) — both pure and client-side.
+Implementation: `adapters/export/pdf-dossier.ts` (jsPDF) and `adapters/export/markdown-dossier.ts` (Markdown/HTML) — both pure and client-side.
 
 ---
 
@@ -157,7 +173,7 @@ The loop detects them: the diagnosis surfaces them under `missing_prerequisites`
 - A **student** whose key is missing (real mode) or whose call fails → marked **"failed"** (grayed-out circle), the class continues.
 - A **teacher** whose call fails → **automatic fallback to the deterministic mock engine** so the loop always completes (announced in the log).
 - The students in a class are launched **in parallel** (concurrency bounded by `CLASSROOM_CONCURRENCY`).
-- A **token counter / estimated cost** is displayed live (approximate cost table in `config.ts`).
+- A **token counter / estimated cost** is displayed live (approximate cost table in `domain/pricing.ts`).
 
 ---
 
@@ -165,7 +181,7 @@ The loop detects them: the diagnosis surfaces them under `missing_prerequisites`
 
 **Decisions made** (the simplest ones that preserve intent):
 
-- **Stack**: we do not follow the starter's hexagonal/auth/Postgres conventions (user decision). ClassroomSim lives in `src/classroom` (domain) + `src/mastra` (runtime); persistence uses Mastra's `LibSQLStore` (SQLite), not Prisma. The starter's auth (`proxy.ts`, `instrumentation.ts`) is neutralized so the app starts without a DB.
+- **Stack**: ClassroomSim is a self-contained **hexagone** (`src/classroom/`) following the starter's ports & adapters convention (ADR-001/004) — `domain` (pure, framework-free) → `application` (the use case + ports) → `adapters` (Mastra runner, mock engine, SSE, export), wired by `classroom.module.ts`. Orchestration is a plain typed use case (not a Mastra workflow); Mastra is demoted to an `AgentRunner` adapter. Persistence uses Mastra's in-memory `LibSQLStore`, not Prisma; the starter's auth (`proxy.ts`, `instrumentation.ts`) is neutralized so the app starts without a DB.
 - **Mock by default**: a deterministic `LanguageModelV2` model + a TS "mock brain" produce schema-valid, profile-consistent output per role, streamed token by token. The 4 real providers are enabled via flags.
 - **Structured output**: the real providers use `structuredOutput` (Zod-validated); the streamed text is thus the JSON being generated — the bubble displays it live, then shows a **condensed summary** at the end (same for the mock). Uniform and honest.
 - **Generic mock**: the mock brain extracts title/sections/terms from any lesson; the numeric values in the examples are written for the demo finance lesson.
