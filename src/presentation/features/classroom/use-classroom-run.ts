@@ -17,6 +17,18 @@ import type {
   TeacherDiagnosis,
 } from "@/classroom/domain";
 
+/** One source input as posted to the run route (PDFs carry base64 in `data`). */
+export type LessonSourceInput =
+  | { kind: "text"; text: string }
+  | { kind: "pdf"; filename?: string; data: string };
+
+/** The body posted to `/api/classroom/run` — legacy `markdown` and/or `inputs`. */
+export interface RunRequest {
+  title?: string;
+  markdown?: string;
+  inputs?: LessonSourceInput[];
+}
+
 export interface AgentView {
   meta: AgentMeta;
   status: AgentStatus;
@@ -148,7 +160,7 @@ export function useClassroomRun() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const abortRef = useRef<AbortController | null>(null);
 
-  const start = useCallback(async (lesson: { title?: string; markdown: string }) => {
+  const start = useCallback(async (request: RunRequest) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -158,7 +170,7 @@ export function useClassroomRun() {
       const res = await fetch("/api/classroom/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(lesson),
+        body: JSON.stringify(request),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {

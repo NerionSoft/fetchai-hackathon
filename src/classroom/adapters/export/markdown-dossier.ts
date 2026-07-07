@@ -54,6 +54,48 @@ function sheetMd(f: RevisionSheet): string {
   return lines.join("\n");
 }
 
+/* --- reusable section bodies (shared by the dossier and per-section exports) --- */
+
+function evaluationsBody(result: LoopResult, withAnswers: boolean): string[] {
+  const out = ["## Evaluations", ""];
+  (["beginner", "intermediate", "advanced"] as const).forEach((lvl) => {
+    out.push(evaluationMd(result.production.evaluations[lvl], withAnswers));
+  });
+  return out;
+}
+
+function exercisesBody(result: LoopResult, withAnswers: boolean): string[] {
+  const out = ["## Exercises", ""];
+  result.production.exercises.exercises.forEach((ex, i) => {
+    out.push(`### ${i + 1}. ${ex.title} _(${ex.format}, ${ex.indicative_level})_`);
+    out.push(ex.statement, "");
+    if (withAnswers) out.push(`_Answer key:_ ${ex.answer_key}`, "");
+  });
+  return out;
+}
+
+/* ------------ per-section markdown builders (fed to markdownToPdf) ------------ */
+
+/** The rewritten lesson, titled — as its own markdown document. */
+export function buildLessonMarkdown(result: LoopResult): string {
+  return `# ${result.lessonVersion.title}\n\n${result.lessonVersion.markdown}`;
+}
+
+/** The evaluations, as their own markdown document. */
+export function buildEvaluationsMarkdown(result: LoopResult, opts: ExportOptions): string {
+  return [`# ${result.lessonVersion.title} — Evaluations`, "", ...evaluationsBody(result, opts.includeAnswerKeys)].join("\n");
+}
+
+/** The exercises, as their own markdown document. */
+export function buildExercisesMarkdown(result: LoopResult, opts: ExportOptions): string {
+  return [`# ${result.lessonVersion.title} — Exercises`, "", ...exercisesBody(result, opts.includeAnswerKeys)].join("\n");
+}
+
+/** The revision sheet, as its own markdown document. */
+export function buildSheetMarkdown(result: LoopResult): string {
+  return `# ${result.lessonVersion.title} — Revision sheet\n\n${sheetMd(result.production.sheet)}`;
+}
+
 export function buildMarkdown(result: LoopResult, opts: ExportOptions): string {
   const { lessonVersion, diagnosis, production } = result;
   const out: string[] = [];
@@ -63,17 +105,8 @@ export function buildMarkdown(result: LoopResult, opts: ExportOptions): string {
   out.push("## Lesson (rewritten version)", "", lessonVersion.markdown, "");
   out.push(diagnosisMd(diagnosis), "");
 
-  out.push("## Evaluations", "");
-  (["beginner", "intermediate", "advanced"] as const).forEach((lvl) => {
-    out.push(evaluationMd(production.evaluations[lvl], opts.includeAnswerKeys));
-  });
-
-  out.push("## Exercises", "");
-  production.exercises.exercises.forEach((ex, i) => {
-    out.push(`### ${i + 1}. ${ex.title} _(${ex.format}, ${ex.indicative_level})_`);
-    out.push(ex.statement, "");
-    if (opts.includeAnswerKeys) out.push(`_Answer key:_ ${ex.answer_key}`, "");
-  });
+  out.push(...evaluationsBody(result, opts.includeAnswerKeys));
+  out.push(...exercisesBody(result, opts.includeAnswerKeys));
 
   out.push(sheetMd(production.sheet), "");
 

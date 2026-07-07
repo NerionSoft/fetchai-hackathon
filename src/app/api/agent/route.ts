@@ -10,7 +10,7 @@
 import { z } from "zod";
 
 import { buildMarkdown } from "@/classroom/adapters/export/markdown-dossier";
-import { RunLoopInputSchema, toLesson } from "@/classroom/application/dto/run-loop-input";
+import { RunLoopInputSchema, toRunParams } from "@/classroom/application/dto/run-loop-input";
 import { NULL_SINK } from "@/classroom/application/ports/run-event-sink";
 import { runClassroomLoop } from "@/classroom/classroom.module";
 
@@ -27,12 +27,10 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: message }, { status: 400 });
   }
 
-  const lesson = toLesson(input);
-
   try {
-    const result = await runClassroomLoop.execute({ lesson, sink: NULL_SINK });
+    const result = await runClassroomLoop.execute(toRunParams(input, NULL_SINK));
     const dossier = buildMarkdown(result, { includeAnswerKeys: true });
-    return Response.json({ title: lesson.title, dossier_markdown: dossier, result });
+    return Response.json({ title: result.lessonOriginal.title, dossier_markdown: dossier, result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return Response.json({ error: message }, { status: 500 });

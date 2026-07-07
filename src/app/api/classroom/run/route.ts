@@ -9,7 +9,7 @@
 import { z } from "zod";
 
 import { createSseRunEventSink } from "@/classroom/adapters/sse/sse-run-event-sink";
-import { RunLoopInputSchema, toLesson } from "@/classroom/application/dto/run-loop-input";
+import { RunLoopInputSchema, toRunParams } from "@/classroom/application/dto/run-loop-input";
 import { runClassroomLoop } from "@/classroom/classroom.module";
 
 export const runtime = "nodejs";
@@ -25,13 +25,11 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: message }, { status: 400 });
   }
 
-  const lesson = toLesson(input);
-
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const sink = createSseRunEventSink(controller);
       try {
-        await runClassroomLoop.execute({ lesson, sink });
+        await runClassroomLoop.execute(toRunParams(input, sink));
       } catch (err) {
         sink.emit({ type: "error", message: err instanceof Error ? err.message : String(err) });
       } finally {
