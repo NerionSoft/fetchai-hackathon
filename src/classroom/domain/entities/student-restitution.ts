@@ -31,8 +31,7 @@ export const StudentRestitutionSchema = z.object({
   uncertain_points: z.array(z.string()),
   questions_for_teacher: z
     .array(z.string())
-    .max(2)
-    .describe("0 to 2 questions, consistent with the profile."),
+    .describe("Ideally 0 to 2 questions, consistent with the profile (soft guidance, not enforced)."),
   revealed_errors: z
     .array(RevealedErrorSchema)
     .describe("META FIELD — feeds the diagnosis directly."),

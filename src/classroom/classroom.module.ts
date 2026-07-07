@@ -14,9 +14,11 @@
  */
 import { MastraAgentRunner } from "./adapters/mastra/mastra-agent-runner";
 import { MockAgentFallback } from "./adapters/mock/mock-agent-fallback";
+import { ServerPdfCodex } from "./adapters/pdf/pdf-codex";
 import { RunClassroomLoopUseCase } from "./application/usecases/run-classroom-loop.usecase";
 
 const runner = new MastraAgentRunner();
 const fallback = new MockAgentFallback();
+const pdfCodex = new ServerPdfCodex();
 
-export const runClassroomLoop = new RunClassroomLoopUseCase(runner, fallback);
+export const runClassroomLoop = new RunClassroomLoopUseCase(runner, fallback, pdfCodex);

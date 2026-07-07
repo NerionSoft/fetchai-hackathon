@@ -36,7 +36,7 @@ const ENV_PREFIX: Record<RealProvider, string> = {
 const DEFAULT_MODELS: Record<RealProvider, { base: string; strong: string }> = {
   anthropic: { base: "claude-sonnet-4.6", strong: "claude-opus-4.6" },
   openai: { base: "gpt-5.4-mini", strong: "gpt-5.4-mini" },
-  google: { base: "gemini-2.5-flash", strong: "gemini-2.5-pro" },
+  google: { base: "gemini-2.5-flash-lite", strong: "gemini-2.5-flash-lite" },
   deepseek: { base: "deepseek-v3.2", strong: "deepseek-v3.2:thinking" },
 };
 
