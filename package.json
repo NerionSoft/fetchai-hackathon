@@ -30,7 +30,7 @@
     "@mastra/memory": "^1.22.1",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "better-auth": "^1.6.9",
+    "better-auth": "^1.6.13",
     "dotenv": "^17.4.2",
     "eslint-config-prettier": "^10.1.8",
     "jspdf": "^4.2.1",
